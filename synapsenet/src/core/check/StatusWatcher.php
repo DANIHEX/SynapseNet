@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace synapsenet\core\check;
 
@@ -18,7 +18,7 @@ class StatusWatcher extends Thread {
     public int $coreUsage = 0;
     public int $ticks = 0;
 
-    public function __construct(){
+    public function __construct() {
         parent::__construct("StatusWatcher");
     }
 
@@ -80,8 +80,8 @@ class StatusWatcher extends Thread {
         $this->ticks = 0;
     }
 
-    public function run(){
-        while($this->onair){
+    public function run() {
+        while($this->onair) {
             $this->refresh();
             sleep(1);
         }

@@ -1,24 +1,35 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace synapsenet\core\thread;
 
 class Thread extends \Thread {
 
+    /** @var string */
     public string $name;
+
+    /** @var bool */
     public bool $onair = false;
 
-    public function __construct(string $name){
+    /**
+     * @param string $name
+     */
+    public function __construct(string $name) {
         $this->name = $name;
     }
 
+    /**
+     * @return string
+     */
     public function getName(): string {
         return $this->name;
     }
 
-    public function shutdown(){
+    /**
+     * @return void
+     */
+    public function shutdown(): void {
         $this->onair = false;
     }
-
 }
