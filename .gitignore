@@ -1,0 +1,10 @@
+.idea
+.local
+extensions
+extensions_data
+players
+server.log
+server.yml
+composer.json
+composer.lock
+composer.phar
