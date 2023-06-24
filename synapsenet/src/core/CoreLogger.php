@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace synapsenet\core;
 
-use ReflectionClass;
 use synapsenet\core\thread\Thread;
 use Threaded;
 use Throwable;
@@ -44,6 +43,7 @@ class CoreLogger extends Thread {
      */
     public function __construct(string $logfile) {
         parent::__construct("CoreLogger");
+
         $this->logfile = $logfile;
 
         $this->logStream = new Threaded();
@@ -170,6 +170,7 @@ class CoreLogger extends Thread {
         if(Thread::getCurrentThread() !== null) {
             $thread = Thread::getCurrentThread()->getName();
         }
+
         $prefix = strtoupper($level);
         $fmsg = "[" . $thread . " | " . date("Y/m/d - H:i:s") . "][" . $prefix . "] " . $message;
 

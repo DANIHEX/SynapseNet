@@ -3,6 +3,7 @@
 namespace synapsenet\item;
 
 class ItemFactory {
+
     /**
      * @param int $itemId
      * @param int $count

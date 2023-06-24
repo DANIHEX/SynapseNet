@@ -230,29 +230,21 @@ class CoreServer {
     }
 
     /**
-     * @return string
+     * @param bool $asString
+     *
+     * @return int|string
      */
     public function getDefaultGameMode(bool $asString = false): int|string {
         $mode = $this->defaultGameMode;
-        if($asString){
-            switch($mode){
-                case 0:
-                    return "Survival";
-                    break;
-                case 1:
-                    return "Creative";
-                    break;
-                case 2:
-                    return "Adventure";
-                    break;
-                case 3:
-                    return "Spectator";
-                    break;
-                default:
-                    return "Survival";
-                    break;
-            }
+        if($asString) {
+            return match ($mode) {
+                1 => "Creative",
+                2 => "Adventure",
+                3 => "Spectator",
+                default => "Survival",
+            };
         }
+
         return min(max($mode, 0), 3);
     }
 
@@ -323,7 +315,7 @@ class CoreServer {
         $this->proccess();
     }
 
-    private function proccess(){
+    private function proccess() {
         $this->tickCycleTime = microtime(true);
         $this->nextTick = microtime(true);
 

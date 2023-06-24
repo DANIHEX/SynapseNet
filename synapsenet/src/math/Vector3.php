@@ -21,6 +21,27 @@ class Vector3 {
     }
 
     /**
+     * @return float|int
+     */
+    public function getX(): float|int {
+        return $this->x;
+    }
+
+    /**
+     * @return float|int
+     */
+    public function getY(): float|int {
+        return $this->y;
+    }
+
+    /**
+     * @return float|int
+     */
+    public function getZ(): float|int {
+        return $this->z;
+    }
+
+    /**
      * @param float $x
      * @param float $y
      * @param float $z

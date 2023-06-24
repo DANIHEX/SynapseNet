@@ -1,0 +1,24 @@
+---
+# Server name
+server-name: "SynapseNet Server"
+
+# Server port
+port: 19132
+port6: 19133
+
+# Message of the query
+motq: "SynapseNet Server"
+
+# Message of the day
+motd: "A New SynapseNet Server!"
+
+# Default server gamemode
+default-gamemode: 0
+
+# Max number of players that can join the server
+max-players: 100
+
+# Command line server title format
+# Available options: SERVER_NAME, SERVER_IP, SERVER_PORT, ONLINE_PLAYERS, MAX_PLAYERS, SERVER_TPS, SERVER_MEMORY_USAGE, SERVER_LOAD, SERVER_QUALITY
+cli-title-format: "SERVER_NAME  |  Address: SERVER_IP:SERVER_PORT  |  Online Players: ONLINE_PLAYERS/MAX_PLAYERS  |  TPS: SERVER_TPS  |  Memory Usage: SERVER_MEMORY_USAGE  |  Load: SERVER_LOAD%  |  SERVER_QUALITY"
+...

@@ -4,7 +4,7 @@ extensions
 extensions_data
 players
 server.log
-server.yml
+/server.yml
 composer.json
 composer.lock
 composer.phar

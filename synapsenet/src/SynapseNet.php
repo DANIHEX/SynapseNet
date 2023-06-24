@@ -21,7 +21,7 @@ namespace synapsenet {
 
     const MIN_PHP_VERSION = "8.0.0";
 
-    if(version_compare(MIN_PHP_VERSION, PHP_VERSION) > 0){
+    if(version_compare(MIN_PHP_VERSION, PHP_VERSION) > 0) {
         message("ERROR", "You need a php version " . MIN_PHP_VERSION . " or higher to use SynapseNet. Your php version:" . PHP_VERSION);
         exit(1);
     }
@@ -37,13 +37,13 @@ namespace synapsenet {
     }
 
     function boot(): void {
-        if(check()){
+        if(check()) {
             message("critical", "Some requirement are not getting satisfied.");
         }
 
         $autoloaderpath = dirname(__DIR__) . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "autoload.php";
         // echo $autoloaderpath;
-        if(!file_exists($autoloaderpath)){
+        if(!file_exists($autoloaderpath)) {
             message("critical", "Autoloader not found at " . $autoloaderpath);
             exit(1);
         }

@@ -1,24 +1,36 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace synapsenet\network\protocol\packets\handshake;
 
 use synapsenet\binary\Binary;
 use synapsenet\network\protocol\packets\Packet;
+use synapsenet\network\protocol\packets\PacketSendInterface;
 
 class UnconnectedPong extends Packet implements PacketSendInterface {
 
-    private int $packetId = 0x1c;
+    /** @var int */
     public int $time;
+    /** @var int */
     public int $serverGuid;
-    private string $magic = "00ffff00fefefefefdfdfdfd12345678";
+
+    /** @var string */
     public string $serverIdString;
 
-    public function __construct(){
+    /** @var int */
+    private int $packetId = 0x1c;
+
+    /** @var string */
+    private string $magic = "00ffff00fefefefefdfdfdfd12345678";
+
+    public function __construct() {
         parent::__construct($this->packetId, "");
     }
 
+    /**
+     * @return string
+     */
     public function make(): string {
         $this->buffer .= $this->getPacketId();
         $this->buffer .= Binary::writeLong($this->time);
@@ -26,7 +38,7 @@ class UnconnectedPong extends Packet implements PacketSendInterface {
         $this->buffer .= $this->magic;
         $this->buffer .= $this->serverIdString;
         $this->ready = true;
+
         return $this->buffer;
     }
-
 }
