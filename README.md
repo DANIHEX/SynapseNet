@@ -17,7 +17,7 @@
 Done:
 - [x] Server Status Checking
 - [x] Query
-- [X] Plugins [Kinda?]
+- [X] Extensions [Kinda?]
 - [X] Levels
 
 Waiting:
