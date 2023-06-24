@@ -16,13 +16,13 @@
 use synapsenet\core\CoreServer;
 use synapsenet\core\CoreLogger;
 
-if(version_compare("8.0.0", PHP_VERSION) > 0){
+if(version_compare("8.0.0", PHP_VERSION) > 0) {
     echo "You need a php version 8.0.0 or higher to use SynapseNet. Your php version:" . PHP_VERSION . PHP_EOL;
     exit(1);
 }
 
 $autoloadpath = dirname(__DIR__) . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "autoload.php";
-if(!file_exists($autoloadpath)){
+if(!file_exists($autoloadpath)) {
     echo "Autoloader not found at " . $autoloadpath;
     exit(1);
 }
