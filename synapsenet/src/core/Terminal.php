@@ -48,7 +48,9 @@ class Terminal {
      * @return void
      */
     public static function setProgressBar($done, string $message = "Loading...", int $total = 100, int $size = 70): void {
-        if($done > $total) return;
+        if($done > $total) {
+            return;
+        }
 
         $percent = (double) ($done / $total);
         $bar = floor($percent * $size);
