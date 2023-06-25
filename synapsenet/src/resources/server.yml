@@ -19,6 +19,16 @@ default-gamemode: 0
 max-players: 100
 
 # Command line server title format
-# Available options: SERVER_NAME, SERVER_IP, SERVER_PORT, ONLINE_PLAYERS, MAX_PLAYERS, SERVER_TPS, SERVER_MEMORY_USAGE, SERVER_LOAD, SERVER_QUALITY
-cli-title-format: "SERVER_NAME  |  Address: SERVER_IP:SERVER_PORT  |  Online Players: ONLINE_PLAYERS/MAX_PLAYERS  |  TPS: SERVER_TPS  |  Memory Usage: SERVER_MEMORY_USAGE  |  Load: SERVER_LOAD%  |  SERVER_QUALITY"
+# Available options: SERVER_NAME, SERVER_IP, SERVER_PORT, ONLINE_PLAYERS, MAX_PLAYERS, SERVER_TPS, SERVER_MEMORY_USAGE, SERVER_CPU_USAGE, SERVER_QUALITY
+cli-title-format: "SERVER_NAME  |  Address: SERVER_IP:SERVER_PORT  |  Online Players: ONLINE_PLAYERS/MAX_PLAYERS  |  TPS: SERVER_TPS  |  Memory: SERVER_MEMORY_USAGE  |  Cpu: SERVER_CPU_USAGE%  |  SERVER_QUALITY"
+
+# EXPERIMENTAL
+# Warning:This may cause some issues
+# Normal(0): @20Tps
+# Turbo(1): 10 times faster than normal @200Tps 
+# Thunder(2): 100 times faster than normal @2000Tps
+# 
+# Warning: Max mode is extremely unstable use it on your own
+# Max(3): Unlimited @?TPS
+performance-mode: 0
 ...

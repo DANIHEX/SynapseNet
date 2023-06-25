@@ -6,7 +6,7 @@ namespace synapsenet\core\check;
 
 use synapsenet\core\thread\Thread;
 
-class StatusWatcher extends Thread {
+class Status extends Thread {
 
     public string $format;
     public string $name;
@@ -15,7 +15,8 @@ class StatusWatcher extends Thread {
     public string $ip;
     public int $port;
     public int $threads = 0;
-    public int $coreUsage = 0;
+    public int $memUsage = 0;
+    public int $cpuUsage = 0;
     public int $ticks = 0;
 
     public function __construct() {
@@ -28,7 +29,7 @@ class StatusWatcher extends Thread {
         $this->start(PTHREADS_INHERIT_NONE);
     }
 
-    public function tick($format, $name, $onlinePlayers, $maxPlayers, $ip, $port, $threads, $usage): void {
+    public function tick($format, $name, $onlinePlayers, $maxPlayers, $ip, $port, $threads, $memUsage, $cpuUsage): void {
         $this->format = $format;
         $this->name = $name;
         $this->onlinePlayers = $onlinePlayers;
@@ -36,7 +37,8 @@ class StatusWatcher extends Thread {
         $this->ip = $ip;
         $this->port = $port;
         $this->threads = $threads;
-        $this->coreUsage = $usage;
+        $this->memUsage = $memUsage;
+        $this->cpuUsage = $cpuUsage;
         $this->ticks++;
     }
 
@@ -45,8 +47,8 @@ class StatusWatcher extends Thread {
 
         $q = max((min(20, $this->ticks) - 10) * 2, 0);
         $quality = "Low [" . str_repeat(":", $q) . str_repeat(" ", (20 - $q)) . "] High";
-        $mem = ((memory_get_usage() + $this->coreUsage) / 1024) / 1024;
-        $load = round(($mem / intval(rtrim(ini_get("memory_limit"), "M"))) * 100, 2);
+        $mem = ((memory_get_usage() + $this->memUsage) / 1024) / 1024;
+        // $load = round(($mem / intval(rtrim(ini_get("memory_limit"), "M"))) * 100, 2);
 
         $title = str_replace([
             "SERVER_NAME",
@@ -57,7 +59,7 @@ class StatusWatcher extends Thread {
             "SERVER_THREADS",
             "SERVER_TPS",
             "SERVER_MEMORY_USAGE",
-            "SERVER_LOAD",
+            "SERVER_CPU_USAGE",
             "SERVER_QUALITY"
         ], [
             $this->name,
@@ -68,7 +70,7 @@ class StatusWatcher extends Thread {
             $this->threads,
             $this->ticks,
             round($mem, 3) . "MB",
-            $load,
+            $this->cpuUsage,
             $quality
         ], $this->format);
 

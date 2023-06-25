@@ -1,12 +1,24 @@
 <?php
 
+/**
+ *
+ *  ______   ___   _    _    ____  ____  _____ _   _ _____ _____ 
+ * / ___\ \ / / \ | |  / \  |  _ \/ ___|| ____| \ | | ____|_   _|
+ * \___ \\ V /|  \| | / _ \ | |_) \___ \|  _| |  \| |  _|   | |  
+ *  ___) || | | |\  |/ ___ \|  __/ ___) | |___| |\  | |___  | |  
+ * |____/ |_| |_| \_/_/   \_\_|   |____/|_____|_| \_|_____| |_|  
+ *
+ *
+ *
+ *
+*/
+
 declare(strict_types=1);
 
 namespace synapsenet\network\protocol;
 
-use Socket;
-use RuntimeException;
-use InvalidArgumentException;
+use Exception;
+use synapsenet\core\CoreServer;
 
 class ServerSocket {
 
@@ -16,49 +28,61 @@ class ServerSocket {
     /** @var int */
     public int $port;
 
-    /** @var resource|Socket */
+    /** @var resource */
     public $socket;
 
     /**
-     * @param string $ip
+     * @param string $address
      * @param int $port
      * @param int $version
      */
-    public function __construct(string $ip, int $port, int $version) {
-        $this->address = $ip;
+    public function __construct(string $address, int $port, int $version){
+        $this->address = $address;
 
-        if($port < 0 or $port > 65535) {
-            throw new InvalidArgumentException("Invalid port range: " . $port . ", A valid port should be between 0 to 65535.");
+        if($port < 0 or $port > 65535){
+            throw new Exception("Only ports in range 0 to 65535 are accepted");
+        }
+
+        if($port < 11){
+            throw new Exception("Ports 0 to 10 are for internal uses");
         }
 
         $this->port = $port;
 
-        $socket = @socket_create($version === 4 ? AF_INET : AF_INET6, SOCK_DGRAM, SOL_UDP);
-        if(!$socket) {
-            throw new RuntimeException("Failed to create socket: " . trim(socket_strerror(socket_last_error())));
+        $socket = false;
+        if($version === 4){
+            $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        } else {
+            $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
         }
-
+        if(!$socket){
+            throw new Exception("Socket creation failed due to: " . socket_strerror(socket_last_error()));
+        }
         $this->socket = $socket;
 
-        if($version === 6) {
+        if($version === 6){
             socket_set_option($this->socket, IPPROTO_IPV6, IPV6_V6ONLY, 1);
         }
 
-        $bind = @socket_bind($this->socket, $ip, $port);
-        if($bind) {
-            $size = 1024 * 1024 * 8;
-            @socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, $size);
-            @socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, $size);
-        } else {
-            $error = socket_last_error($this->socket);
-            if($error === SOCKET_EADDRINUSE) {
-                throw new RuntimeException("Failed to bind socket: Something else is already running on " . $ip . ":" . $port);
+        CoreServer::getInstance()->getLogger()->info("Address: " . $address . ":" . $port);
+        $bind = socket_bind($this->socket, $address, $port);
+        if(!$bind){
+            if(socket_last_error($this->socket) === SOCKET_EADDRINUSE){
+                throw new Exception("Selected port is currently being used by another program");
             }
-            
-            throw new RuntimeException("Failed to bind to " . $ip . ":" . $port . ": " . trim(socket_strerror(socket_last_error($this->socket))));
+            throw new Exception("Socket binding failed due to: " . socket_strerror(socket_last_error()));
         }
+        $send = 8 * 1024 * 1024;
+        $recieve = 8 * 1024 * 1024;
+        socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, $send);
+        socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, $recieve);
 
         socket_set_nonblock($this->socket);
+    }
+
+    public function test(string $buffer, $address, $port){
+        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        socket_sendto($socket, $buffer, strlen($buffer), 0, $address, $port);
     }
 
     /**
@@ -68,8 +92,8 @@ class ServerSocket {
      *
      * @return bool|int
      */
-    public function read(?string &$buffer, ?string &$source, ?int &$port): bool|int {
-        return @socket_recvfrom($this->socket, $buffer, 65535, 0, $source, $port);
+    public function read(?string &$buffer, ?string &$source, ?int &$port) {
+        return socket_recvfrom($this->socket, $buffer, 65535, 0, $source, $port);
     }
 
     /**
@@ -79,7 +103,7 @@ class ServerSocket {
      *
      * @return bool|int
      */
-    public function write(string $buffer, string $dest, int $port): bool|int {
+    public function write(string $buffer, string $dest, int $port) {
         return socket_sendto($this->socket, $buffer, strlen($buffer), 0, $dest, $port);
     }
 }

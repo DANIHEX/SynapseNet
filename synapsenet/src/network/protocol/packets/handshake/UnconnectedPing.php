@@ -11,15 +11,16 @@ use synapsenet\network\protocol\packets\PacketReciveInterface;
 class UnconnectedPing extends Packet implements PacketReciveInterface {
 
     /** @var int */
-    public int $time; // And 0x02
+    private int $packetId = 0x01;
+
+    /** @var int */
+    public int $time;
 
     /** @var string */
     public string $magic;
 
     /** @var int */
     public int $clientUid;
-    /** @var int */
-    private int $packetId = 0x01;
 
     /**
      * @param string $buffer

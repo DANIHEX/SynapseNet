@@ -17,6 +17,7 @@ class Thread extends \Thread {
      */
     public function __construct(string $name) {
         $this->name = $name;
+        // include_once(dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "autoload.php");
     }
 
     /**

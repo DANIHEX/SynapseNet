@@ -29,8 +29,6 @@ if(!file_exists($autoloadpath)) {
 define("S_AUTOLOAD_PATH", $autoloadpath);
 require_once(S_AUTOLOAD_PATH);
 
-echo "Autoload enabled." . PHP_EOL;
-
 define("S_SERVER_PATH", dirname(__DIR__, 2));
 define("S_PLAYERS_PATH", S_SERVER_PATH . DIRECTORY_SEPARATOR . "players");
 define("S_EXTENSIONS_PATH", S_SERVER_PATH . DIRECTORY_SEPARATOR . "extensions");

@@ -172,7 +172,7 @@ class CoreLogger extends Thread {
         }
 
         $prefix = strtoupper($level);
-        $fmsg = "[" . $thread . " | " . date("Y/m/d - H:i:s") . "][" . $prefix . "] " . $message;
+        $fmsg = "[" . $thread . "/" . date("H:i:s") . "][" . $prefix . "] " . $message;
 
         Terminal::message($fmsg);
         $this->logStream[] = $fmsg . PHP_EOL;

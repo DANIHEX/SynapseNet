@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace synapsenet\network;
 
+use synapsenet\core\CoreServer;
+
 class Query {
 
     /** @var string */
@@ -25,8 +27,8 @@ class Query {
     public function generateQuery(string $name, int $onlinePlayers, int $maxPlayers, string $suid, string $motd, string $gamemode, int $gamemodeNumeric, int $port, int $port6): Query {
         $string = "MCPE;";
         $string .= $name . ";";
-        $string .= "400;";
-        $string .= "1.17-1.20;";
+        $string .= "582;";
+        $string .= "1.20;";
         $string .= $onlinePlayers . ";";
         $string .= $maxPlayers . ";";
         $string .= $suid . ";";
@@ -36,6 +38,8 @@ class Query {
         $string .= $port . ";";
         $string .= $port6 . ";";
         $this->string = $string;
+
+        // CoreServer::getInstance()->getLogger()->info($string);
 
         return $this;
     }

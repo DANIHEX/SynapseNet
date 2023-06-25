@@ -18,12 +18,18 @@ declare(strict_types=1);
 namespace synapsenet\core;
 
 use Exception;
-use synapsenet\core\check\StatusWatcher;
+use synapsenet\core\check\Status;
+use synapsenet\core\check\SystemUsage;
 use synapsenet\core\thread\ThreadManager;
 use synapsenet\network\Network;
 use synapsenet\network\Query;
 
 class CoreServer {
+
+    const PERFORMANCE_NORMAL = 0;
+    const PERFORMANCE_TURBO = 1;
+    const PERFORMANCE_THUNDER = 2;
+    const PERFORMANCE_MAX = 3;
 
     /** @var CoreServer|null */
     public static ?CoreServer $instance = null;
@@ -49,8 +55,8 @@ class CoreServer {
     /** @var Network */
     public Network $network;
 
-    /** @var StatusWatcher */
-    public StatusWatcher $statusWatcher;
+    /** @var Status */
+    public Status $statusWatcher;
     
     /** @var string */
     public string $name;
@@ -82,14 +88,12 @@ class CoreServer {
     /** @var array */
     public array $onlinePlayers = [];
 
+    /** @var int */
+    public int $performanceMode;
+
     /** @var array */
     private array $properties = [];
 
-    /** @var int */
-    private int $ticks = 0;
-
-    /** @var float */
-    private float $tickCycleTime = 0.0;
     /** @var float */
     private float $nextTick = 0.0;
 
@@ -126,7 +130,9 @@ class CoreServer {
         $this->extensionsDataDir = $extensionsDataDir;
 
         $propertiesPath = $serverPath . DIRECTORY_SEPARATOR . "server.yml";
-        copy($serverPath . DIRECTORY_SEPARATOR . "synapsenet" . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "server.yml", $serverPath . DIRECTORY_SEPARATOR . "server.yml");
+        if(!file_exists($propertiesPath)){
+            copy($serverPath . DIRECTORY_SEPARATOR . "synapsenet" . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "resources" . DIRECTORY_SEPARATOR . "server.yml", $serverPath . DIRECTORY_SEPARATOR . "server.yml");
+        }
         $this->properties = yaml_parse_file($propertiesPath);
 
         $this->ip = "0.0.0.0";
@@ -143,7 +149,9 @@ class CoreServer {
 
         $this->setMaxPlayers($this->getProperty("max-players"));
 
-        $this->statusWatcher = new StatusWatcher();
+        $this->performanceMode = $this->getProperty("performance-mode");
+
+        $this->statusWatcher = new Status();
         $this->query = new Query();
         $this->network = new Network($this, $this->ip, $this->ip6, $this->port, $this->port6);
 
@@ -238,10 +246,10 @@ class CoreServer {
         $mode = $this->defaultGameMode;
         if($asString) {
             return match ($mode) {
-                1 => "Creative",
-                2 => "Adventure",
-                3 => "Spectator",
-                default => "Survival",
+                1 => "Survival",
+                2 => "Creaative",
+                3 => "Adventure",
+                default => "Spectator",
             };
         }
 
@@ -272,7 +280,7 @@ class CoreServer {
     /**
      * @return StatusWatcher
      */
-    public function getStatusWatcher(): StatusWatcher {
+    public function getStatusWatcher(): Status {
         return $this->statusWatcher;
     }
 
@@ -289,10 +297,6 @@ class CoreServer {
      * @return array
      */
     public function getOnlinePlayers(): array {
-        if(count($this->onlinePlayers) <= 0) {
-            return [];
-        }
-
         return $this->onlinePlayers;
     }
 
@@ -304,24 +308,39 @@ class CoreServer {
     }
 
     /**
+     * @return int|string
+     */
+    public function getPerformanceMode(bool $asString = false): int|string {
+        $mode = $this->performanceMode;
+        if($asString){
+            return match ($mode) {
+                CoreServer::PERFORMANCE_TURBO => "Turbo",
+                CoreServer::PERFORMANCE_THUNDER => "Thunder",
+                CoreServer::PERFORMANCE_MAX => "Max",
+                default => "Normal",
+            };
+        }
+        return $mode;
+    }
+
+    /**
      * @return void
      */
     public function start(): void {
         if($this->onair) return;
-        $this->getNetwork()->start();
-        $this->getStatusWatcher()->startWaching();
         Terminal::setProgressBar(100, "Done!");
+        $this->getNetwork()->start();
+        $this->getLogger()->info("Server started on " . $this->getIp() . ":" . $this->getPort());
+        $this->getStatusWatcher()->startWaching();
         $this->onair = true;
         $this->proccess();
     }
 
     private function proccess() {
-        $this->tickCycleTime = microtime(true);
         $this->nextTick = microtime(true);
 
         while($this->onair) {
             $this->tick();
-            $this->sleepUntilNextTick($this->nextTick);
         }
     }
 
@@ -330,45 +349,30 @@ class CoreServer {
      */
     private function tick(): void {
         $tickTime = microtime(true);
-        if(($tickTime - $this->nextTick) < -0.025) {
-            return;
+        if($this->getPerformanceMode() !== CoreServer::PERFORMANCE_MAX){
+            if(($tickTime - $this->nextTick) < -0.025) {
+                return;
+            }
         }
 
-        // Check the time consumed to cycle full 20 ticks in second(s)
-        // if($this->ticks >= 20) {
-        //     $cycleTime = microtime(true) - $this->tickCycleTime;
-        //     $this->logger->info("Elapsed: " . $cycleTime);
-        //     $this->tickCycleTime = microtime(true);
-        //     $this->ticks = 0;
-        // }
-
-        $this->getStatusWatcher()->tick($this->getProperty("cli-title-format"), $this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getIp(), $this->getPort(), ThreadManager::getCount(), memory_get_usage());
+        $this->getStatusWatcher()->tick($this->getProperty("cli-title-format"), $this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getIp(), $this->getPort(), ThreadManager::getCount(), memory_get_usage(), SystemUsage::getCpuUsage());
 
         $this->getQuery()->generateQuery($this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getServerUid(), $this->getMotd(), $this->getDefaultGameMode(true), $this->getDefaultGameMode(), $this->getPort(), $this->getPort6());
 
         $this->getNetwork()->getPacketHandler()->proccess();
 
 
-        if(($this->nextTick - $tickTime) < -1) {
-            $this->nextTick = $tickTime;
-        } else {
-            $this->nextTick += 0.05;
-        }
-        $this->ticks++;
-    }
-
-    /**
-     * @param float $time
-     *
-     * @return void
-     */
-    private function sleepUntilNextTick(float $time): void {
-        while(true) {
-            $sleepTime = (int) (($time - microtime(true)) * 1000000);
-            if($sleepTime > 0) {
-                usleep($sleepTime);
+        if($this->getPerformanceMode() !== CoreServer::PERFORMANCE_MAX){
+            if(($this->nextTick - $tickTime) < -1) {
+                $this->nextTick = $tickTime;
             } else {
-                break;
+                $amount = match ($this->getPerformanceMode()) {
+                    CoreServer::PERFORMANCE_TURBO => 0.005,
+                    CoreServer::PERFORMANCE_THUNDER => 0.0005,
+                    default => 0.05
+                };
+
+                $this->nextTick += $amount;
             }
         }
     }
