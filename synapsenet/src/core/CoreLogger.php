@@ -17,9 +17,9 @@ declare(strict_types=1);
 
 namespace synapsenet\core;
 
-use synapsenet\core\thread\Thread;
 use Threaded;
 use Throwable;
+use synapsenet\core\thread\Thread;
 
 class CoreLogger extends Thread {
 

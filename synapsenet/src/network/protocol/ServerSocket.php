@@ -36,42 +36,46 @@ class ServerSocket {
      * @param int $port
      * @param int $version
      */
-    public function __construct(string $address, int $port, int $version){
+    public function __construct(string $address, int $port, int $version) {
         $this->address = $address;
 
-        if($port < 0 or $port > 65535){
+        if($port < 0 or $port > 65535) {
             throw new Exception("Only ports in range 0 to 65535 are accepted");
         }
 
-        if($port < 11){
+        if($port < 11) {
             throw new Exception("Ports 0 to 10 are for internal uses");
         }
 
         $this->port = $port;
 
-        $socket = false;
-        if($version === 4){
+        if($version === 4) {
             $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         } else {
             $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
         }
-        if(!$socket){
+
+        if(!$socket) {
             throw new Exception("Socket creation failed due to: " . socket_strerror(socket_last_error()));
         }
+
         $this->socket = $socket;
 
-        if($version === 6){
+        if($version === 6) {
             socket_set_option($this->socket, IPPROTO_IPV6, IPV6_V6ONLY, 1);
         }
 
         CoreServer::getInstance()->getLogger()->info("Address: " . $address . ":" . $port);
         $bind = socket_bind($this->socket, $address, $port);
-        if(!$bind){
-            if(socket_last_error($this->socket) === SOCKET_EADDRINUSE){
+
+        if(!$bind) {
+            if(socket_last_error($this->socket) === SOCKET_EADDRINUSE ) {
                 throw new Exception("Selected port is currently being used by another program");
             }
+
             throw new Exception("Socket binding failed due to: " . socket_strerror(socket_last_error()));
         }
+
         $send = 8 * 1024 * 1024;
         $recieve = 8 * 1024 * 1024;
         socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, $send);
@@ -80,7 +84,14 @@ class ServerSocket {
         socket_set_nonblock($this->socket);
     }
 
-    public function test(string $buffer, $address, $port){
+    /**
+     * @param string $buffer
+     * @param string $address
+     * @param int $port
+     *
+     * @return void
+     */
+    public function test(string $buffer, string $address, int $port): void {
         $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         socket_sendto($socket, $buffer, strlen($buffer), 0, $address, $port);
     }

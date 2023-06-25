@@ -39,10 +39,12 @@ class Buffer {
             $this->offset = $buflen;
             return $str;
         }
+
         if($len < 0) {
             $this->offset = $buflen - 1;
             return "";
         }
+
         $remaining = $buflen - $this->offset;
         if($remaining < $len) {
             throw new Exception("Not enough bytes left in buffer: need $len, have $remaining");
