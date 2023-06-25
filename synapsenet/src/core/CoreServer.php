@@ -403,8 +403,6 @@ class CoreServer {
 
         ThreadManager::shutdownThreads();
 
-        $this->logger->shutdown();
-
         $this->onair = false;
         // TODO: Shutdown cores and process
     }
