@@ -57,7 +57,7 @@ class CoreServer {
     public Network $network;
 
     /** @var Status */
-    public Status $statusWatcher;
+    public Status $status;
     
     /** @var string */
     public string $name;
@@ -154,7 +154,7 @@ class CoreServer {
 
         $this->performanceMode = min(max($this->getProperty("performance-mode"), CoreServer::PERFORMANCE_NORMAL), CoreServer::PERFORMANCE_MAX);
 
-        $this->statusWatcher = new Status();
+        $this->status = new Status();
         $this->query = new Query();
         $this->network = new Network($this, $this->ip, $this->ip6, $this->port, $this->port6);
 
@@ -283,8 +283,8 @@ class CoreServer {
     /**
      * @return Status
      */
-    public function getStatusWatcher(): Status {
-        return $this->statusWatcher;
+    public function getStatus(): Status {
+        return $this->status;
     }
 
     /**
@@ -340,7 +340,7 @@ class CoreServer {
         Terminal::setProgressBar(100, "Done!");
         $this->getNetwork()->start();
         $this->getLogger()->info("Server started on " . $this->getIp() . ":" . $this->getPort());
-        $this->getStatusWatcher()->startWaching();
+        $this->getStatus()->startWaching();
         $this->onair = true;
         $this->proccess();
     }
@@ -367,7 +367,7 @@ class CoreServer {
             }
         }
 
-        $this->getStatusWatcher()->tick($this->getProperty("cli-title-format"), $this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getIp(), $this->getPort(), ThreadManager::getCount(), memory_get_usage(), SystemUsage::getCpuUsage());
+        $this->getStatus()->tick($this->getProperty("cli-title-format"), $this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getIp(), $this->getPort(), ThreadManager::getCount(), memory_get_usage(), SystemUsage::getCpuUsage());
 
         $this->getQuery()->generateQuery($this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getServerUid(), $this->getMotd(), $this->getDefaultGameMode(true), $this->getDefaultGameMode(), $this->getPort(), $this->getPort6());
 

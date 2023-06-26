@@ -9,19 +9,16 @@ use synapsenet\network\protocol\packets\Packet;
 use synapsenet\network\protocol\packets\PacketIdentifiers;
 use synapsenet\network\protocol\packets\PacketWrite;
 
-class UnconnectedPong extends Packet implements PacketWrite {
+class ConnectedPong extends Packet implements PacketWrite {
 
     /** @var int */
-    private int $packetId = PacketIdentifiers::UNCONNECTED_PONG;
+    private int $packetId = PacketIdentifiers::CONNECTED_PONG;
 
     /** @var int */
-    public int $time;
+    public int $pingTtime;
 
     /** @var int */
-    public int $serverGuid;
-
-    /** @var string */
-    public string $serverIdString;
+    public int $pongTtime;
 
     public function __construct() {
         parent::__construct($this->packetId, "");
@@ -32,11 +29,8 @@ class UnconnectedPong extends Packet implements PacketWrite {
      */
     public function make(): string {
         $this->buffer .= chr($this->getPacketId());
-        $this->buffer .= Binary::writeLong($this->time);
-        $this->buffer .= Binary::writeLong($this->serverGuid);
-        $this->buffer .= $this->magic;
-        $this->buffer .= Binary::writeShort(strlen($this->serverIdString));
-        $this->buffer .= $this->serverIdString;
+        $this->buffer .= Binary::writeLong($this->pingTtime);
+        $this->buffer .= Binary::writeLong($this->pongTtime);
 
         return $this->buffer;
     }

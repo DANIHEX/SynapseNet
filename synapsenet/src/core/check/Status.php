@@ -9,7 +9,7 @@ use synapsenet\core\thread\Thread;
 class Status extends Thread {
 
     /** @var string */
-    public string $format;
+    public string $format = "";
     /** @var string */
     public string $name;
 

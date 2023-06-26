@@ -34,7 +34,7 @@ class Query {
         $string .= $suid . ";";
         $string .= $motd . ";";
         $string .= $gamemode . ";";
-        $string .= $gamemodeNumeric . ";";
+        $string .= 1 . ";"; // NOTE: No clue why this should be 1 to work. Am I dumb?
         $string .= $port . ";";
         $string .= $port6 . ";";
         $this->string = $string;

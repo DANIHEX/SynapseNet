@@ -7,9 +7,14 @@ namespace synapsenet\network\protocol\packets;
 use Exception;
 use synapsenet\binary\Buffer;
 use synapsenet\core\CoreServer;
+use synapsenet\network\Address;
+use synapsenet\network\protocol\packets\handshake\ConnectedPong;
+use synapsenet\network\protocol\packets\handshake\OpenConnectionReply1;
+use synapsenet\network\protocol\packets\handshake\OpenConnectionReply2;
 use synapsenet\network\protocol\ServerSocket;
 use synapsenet\network\protocol\packets\handshake\UnconnectedPong;
 use synapsenet\network\protocol\packets\handshake\UnconnectedPing;
+use synapsenet\network\protocol\packets\handshake\UnknownPacket;
 
 class PacketHandler {
 
@@ -57,8 +62,8 @@ class PacketHandler {
      *
      * @return void
      */
-    public function sendPacket(PacketSendInterface $packet, string $dest, int $port): void {
-        $this->getServer()->getLogger()->info("Sending an UnconnectedPong packet to: " . $dest . ":" . $port);
+    public function sendPacket(Packet $packet, string $dest, int $port): void {
+        $this->getServer()->getLogger()->info("Sending packet id(" . $packet->getPacketId() . ") to: " . $dest . ":" . $port);
         $this->getSocket()->write($packet->make(), $dest, $port);
     }
 
@@ -71,16 +76,12 @@ class PacketHandler {
         if(is_null($buffer)) {
             return;
         }
-
-        $binary = new Buffer($buffer);
-        $id = ord($binary->get(1));
-        switch($id) {
-            case 0x01:
-            case 0x02:
-                $this->getServer()->getLogger()->info("Recieved an UnconnectedPing packet from: " . $source . ":" . $port);
-                $this->handle(new UnconnectedPing($buffer), $source, $port);
-                break;
+        $packet = PacketMap::match($buffer);
+        if($packet instanceof UnknownPacket){
+            $this->getServer()->getLogger()->info("Unknown packet with id(" . $packet->getPacketId() . ") revieved. Source: " . $source . ":" . $port);
+            return;
         }
+        $this->handle($packet, $source, $port);
     }
 
     /**
@@ -92,12 +93,36 @@ class PacketHandler {
      */
     public function handle(Packet $packet, string $source, int $port): void {
         switch($packet->getPacketId()) {
-            case 0x01:
-            case 0x02:
+            case PacketIdentifiers::CONNECTED_PING:
+                $pk = new ConnectedPong();
+                $pk->pingTtime = $packet->getTime();
+                $pk->pongTtime = time();
+                $this->sendPacket($pk, $source, $port);
+                break;
+            case PacketIdentifiers::UNCONNECTED_PING:
+            case PacketIdentifiers::UNCONNECTED_PING_OPEN:
                 $pk = new UnconnectedPong();
                 $pk->time = $packet->getTime();
                 $pk->serverGuid = $this->getRandomId();
+                $pk->magic = $packet->getMagic();
                 $pk->serverIdString = $this->server->getQuery()->getQueryString();
+                $this->sendPacket($pk, $source, $port);
+                break;
+            case PacketIdentifiers::OPEN_CONNECTION_REQUEST_1:
+                $pk = new OpenConnectionReply1();
+                $pk->magic = $packet->getMagic();
+                $pk->serverGuid = $this->getRandomId();
+                $pk->useSecurity = false;
+                $pk->mtuSize = $packet->getMtuSize();
+                $this->sendPacket($pk, $source, $port);
+                break;
+            case PacketIdentifiers::OPEN_CONNECTION_REQUEST_2:
+                $pk = new OpenConnectionReply2();
+                $pk->magic = $packet->getMagic();
+                $pk->serverGuid = $this->getRandomId();
+                $pk->clientAddress = new Address(4, $source, $port);
+                $pk->mtuSize = $packet->getMtuSize();
+                $pk->encryptionEnabled = false;
                 $this->sendPacket($pk, $source, $port);
                 break;
         }
