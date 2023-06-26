@@ -85,6 +85,7 @@ class PacketHandler {
             $this->getServer()->getLogger()->info("Unknown packet with id(" . $packet->getPacketId() . ") received. Source: " . $source . ":" . $port);
             return;
         }
+        $this->getServer()->getLogger()->info("Packet with id(" . $packet->getPacketId() . ") received. Source: " . $source . ":" . $port);
 
         $this->handle($packet, $source, $port);
     }
@@ -133,6 +134,9 @@ class PacketHandler {
                 $pk->mtuSize = $packet->getMtuSize();
                 $pk->encryptionEnabled = false;
                 $this->sendPacket($pk, $source, $port);
+                break;
+            case PacketIdentifiers::CONNECTION_REQUEST:
+                $pk = new ConnectionRequestAccepted();
                 break;
         }
     }

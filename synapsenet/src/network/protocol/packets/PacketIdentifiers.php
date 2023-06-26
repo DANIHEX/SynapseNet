@@ -20,6 +20,7 @@ class PacketIdentifiers {
     public const OPEN_CONNECTION_REQUEST_2 = 0x07;
     public const OPEN_CONNECTION_REPLY_2 = 0x08;
     public const CONNECTION_REQUEST = 0x09;
+    public const CONNECTION_REQUEST_ACCEPTED = 0x10;
     public const UNCONNECTED_PONG = 0x1c;
 
 }
