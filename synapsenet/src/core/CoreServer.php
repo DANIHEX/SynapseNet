@@ -338,9 +338,9 @@ class CoreServer {
         }
 
         Terminal::setProgressBar(100, "Done!");
-        $this->getNetwork()->start();
-        $this->getLogger()->info("Server started on " . $this->getIp() . ":" . $this->getPort());
-        $this->getStatus()->startWaching();
+        $this->network->start();
+        $this->logger->info("Server started on " . $this->getIp() . ":" . $this->getPort());
+        $this->status->startWaching();
         $this->onair = true;
         $this->proccess();
     }
@@ -367,18 +367,18 @@ class CoreServer {
             }
         }
 
-        $this->getStatus()->tick($this->getProperty("cli-title-format"), $this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getIp(), $this->getPort(), ThreadManager::getCount(), memory_get_usage(), SystemUsage::getCpuUsage());
+        $this->status->tick($this->getProperty("cli-title-format"), $this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getIp(), $this->getPort(), ThreadManager::getCount(), memory_get_usage(), SystemUsage::getCpuUsage());
 
-        $this->getQuery()->generateQuery($this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getServerUid(), $this->getMotd(), $this->getDefaultGameMode(true), $this->getDefaultGameMode(), $this->getPort(), $this->getPort6());
+        $this->query->generateQuery($this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getServerUid(), $this->getMotd(), $this->getDefaultGameMode(true), $this->getDefaultGameMode(), $this->getPort(), $this->getPort6());
 
-        $this->getNetwork()->getPacketHandler()->proccess();
+        $this->network->getPacketHandler()->proccess();
 
 
-        if($this->getPerformanceMode() !== CoreServer::PERFORMANCE_MAX) {
+        if($this->performanceMode !== CoreServer::PERFORMANCE_MAX) {
             if(($this->nextTick - $tickTime) < -1) {
                 $this->nextTick = $tickTime;
             } else {
-                $amount = match ($this->getPerformanceMode()) {
+                $amount = match ($this->performanceMode) {
                     CoreServer::PERFORMANCE_TURBO => 0.005,
                     CoreServer::PERFORMANCE_THUNDER => 0.0005,
                     default => 0.05

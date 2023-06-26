@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace synapsenet\network\protocol\packets;
 
@@ -17,12 +17,16 @@ use synapsenet\network\protocol\packets\handshake\UnknownPacket;
 
 class PacketMap {
 
+    /**
+     * @param string $buf
+     *
+     * @return Packet
+     */
     public static function match(string $buf): Packet {
         $buffer = new Buffer($buf);
         return match (ord($buffer->get(1))) {
             PacketIdentifiers::CONNECTED_PING => new ConnectedPing($buf),
-            PacketIdentifiers::UNCONNECTED_PING => new UnconnectedPing($buf),
-            PacketIdentifiers::UNCONNECTED_PING_OPEN => new UnconnectedPing($buf),
+            PacketIdentifiers::UNCONNECTED_PING, PacketIdentifiers::UNCONNECTED_PING_OPEN => new UnconnectedPing($buf),
             PacketIdentifiers::CONNECTED_PONG => new ConnectedPong(),
             PacketIdentifiers::OPEN_CONNECTION_REQUEST_1 => new OpenConnectionRequest1($buf),
             PacketIdentifiers::OPEN_CONNECTION_REPLY_1 => new OpenConnectionReply1(),
