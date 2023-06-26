@@ -1,33 +1,49 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace synapsenet\network;
 
 class Address {
 
+    /** @var int */
     public int $version;
 
+    /** @var string */
     public string $ip;
 
+    /** @var int */
     public int $port;
 
-    public function __construct(int $version, string $ip, int $port){
+    /**
+     * @param int $version
+     * @param string $ip
+     * @param int $port
+     */
+    public function __construct(int $version, string $ip, int $port) {
         $this->version = $version;
         $this->ip = $ip;
         $this->port = $port;
     }
 
+    /**
+     * @return int
+     */
     public function getVersion(): int {
         return $this->version;
     }
 
+    /**
+     * @return string
+     */
     public function getIp(): string {
         return $this->ip;
     }
 
-    public function getport(): int {
+    /**
+     * @return int
+     */
+    public function getPort(): int {
         return $this->port;
     }
-
 }

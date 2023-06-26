@@ -15,10 +15,10 @@ class ConnectedPong extends Packet implements PacketWrite {
     private int $packetId = PacketIdentifiers::CONNECTED_PONG;
 
     /** @var int */
-    public int $pingTtime;
+    public int $pingTime;
 
     /** @var int */
-    public int $pongTtime;
+    public int $pongTime;
 
     public function __construct() {
         parent::__construct($this->packetId, "");
@@ -29,8 +29,8 @@ class ConnectedPong extends Packet implements PacketWrite {
      */
     public function make(): string {
         $this->buffer .= chr($this->getPacketId());
-        $this->buffer .= Binary::writeLong($this->pingTtime);
-        $this->buffer .= Binary::writeLong($this->pongTtime);
+        $this->buffer .= Binary::writeLong($this->pingTime);
+        $this->buffer .= Binary::writeLong($this->pongTime);
 
         return $this->buffer;
     }

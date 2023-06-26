@@ -54,12 +54,17 @@ class Buffer {
         return $len === 1 ? $this->buffer[$this->offset++] : substr($this->buffer, ($this->offset += $len) - $len, $len);
     }
 
+    /**
+     * @param string $buffer
+     *
+     * @return Address
+     */
     public function getAddress(string $buffer): Address {
         $buffer = new Buffer($buffer);
         $version = ord($buffer->get(1));
         $ip = "0:0:0:0";
         $port = 0;
-        if($version === 4){
+        if($version === 4) {
             $ip = ord($buffer->get(1)) . ":" . ord($buffer->get(1)) . ":" . ord($buffer->get(1)) . ":" . ord($buffer->get(1));
             $port = Binary::readShort($buffer->get(2));
         }
@@ -67,18 +72,27 @@ class Buffer {
         return new Address($version, $ip, $port);
     }
 
-    public function getAddressBuffer(Address $addres): string {
-        $parts = explode(":", $addres->getIp());
-        $buf = chr($addres->getVersion());
+    /**
+     * @param Address $address
+     *
+     * @return string
+     */
+    public function getAddressBuffer(Address $address): string {
+        $parts = explode(":", $address->getIp());
+        $buf = chr($address->getVersion());
         $buf .= chr(intval($parts[0]));
         $buf .= chr(intval($parts[1]));
         $buf .= chr(intval($parts[2]));
         $buf .= chr(intval($parts[3]));
-        $buf .= Binary::writeShort($addres->getport());
+        $buf .= Binary::writeShort($address->getPort());
+
         return $buf;
     }
 
-    public function getRemaining(){
+    /**
+     * @return string
+     */
+    public function getRemaining(): string {
         return substr($this->buffer, $this->offset);
     }
 }

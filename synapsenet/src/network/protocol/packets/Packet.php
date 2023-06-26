@@ -22,6 +22,7 @@ abstract class Packet extends Buffer {
      */
     public function __construct(/* int $protocol, */int $id, string $buffer) {
         parent::__construct($buffer);
+
         // $this->protocol = $protocol;
         $this->id = $id;
         
@@ -43,6 +44,8 @@ abstract class Packet extends Buffer {
     }
 
     /**
+     * @param string $buffer
+     *
      * @return void
      */
     public function setBuffer(string $buffer): void {

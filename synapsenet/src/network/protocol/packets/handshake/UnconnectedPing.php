@@ -32,6 +32,7 @@ class UnconnectedPing extends Packet implements PacketRead {
      */
     public function __construct(string $buffer) {
         parent::__construct($this->packetId, $buffer);
+
         $this->extract();
     }
 

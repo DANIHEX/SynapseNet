@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace synapsenet\network\protocol\packets\handshake;
 
@@ -10,7 +10,7 @@ use synapsenet\network\protocol\packets\Packet;
 class UnknownPacket extends Packet {
 
     /**
-     * @param string $buffer
+     * @param string $buf
      */
     public function __construct(string $buf) {
         $buffer = new Buffer($buf);
