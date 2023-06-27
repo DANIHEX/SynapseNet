@@ -22,6 +22,9 @@ use synapsenet\core\CoreServer;
 
 class ServerSocket {
 
+    /** @var ServerSocket */
+    public static ServerSocket $instance;
+
     /** @var string */
     public string $address;
 
@@ -65,7 +68,6 @@ class ServerSocket {
             socket_set_option($this->socket, IPPROTO_IPV6, IPV6_V6ONLY, 1);
         }
 
-        CoreServer::getInstance()->getLogger()->info("Address: " . $address . ":" . $port);
         $bind = socket_bind($this->socket, $address, $port);
 
         if(!$bind) {
@@ -82,18 +84,12 @@ class ServerSocket {
         socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, $recieve);
 
         socket_set_nonblock($this->socket);
+
+        self::$instance = $this;
     }
 
-    /**
-     * @param string $buffer
-     * @param string $address
-     * @param int $port
-     *
-     * @return void
-     */
-    public function test(string $buffer, string $address, int $port): void {
-        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-        socket_sendto($socket, $buffer, strlen($buffer), 0, $address, $port);
+    public static function getInstance(){
+        return self::$instance;
     }
 
     /**

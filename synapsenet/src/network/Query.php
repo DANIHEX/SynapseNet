@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace synapsenet\network;
 
-use synapsenet\core\CoreServer;
-
 class Query {
 
     /** @var string */
@@ -24,7 +22,7 @@ class Query {
      *
      * @return Query
      */
-    public function generateQuery(string $name, int $onlinePlayers, int $maxPlayers, string $suid, string $motd, string $gamemode, int $gamemodeNumeric, int $port, int $port6): Query {
+    public function generateQuery(string $name, int $onlinePlayers, int $maxPlayers, string $suid, string $motq, string $gamemode, int $gamemodeNumeric, int $port, int $port6): Query {
         $string = "MCPE;";
         $string .= $name . ";";
         $string .= "582;";
@@ -32,14 +30,12 @@ class Query {
         $string .= $onlinePlayers . ";";
         $string .= $maxPlayers . ";";
         $string .= $suid . ";";
-        $string .= $motd . ";";
+        $string .= $motq . ";";
         $string .= $gamemode . ";";
         $string .= 1 . ";"; // NOTE: No clue why this should be 1 to work. Am I dumb?
         $string .= $port . ";";
         $string .= $port6 . ";";
         $this->string = $string;
-
-        // CoreServer::getInstance()->getLogger()->info($string);
 
         return $this;
     }

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace synapsenet\network\protocol\packets\handshake;
+namespace synapsenet\network\protocol\raknet\packets;
 
 use synapsenet\binary\Buffer;
-use synapsenet\network\protocol\packets\Packet;
+use synapsenet\network\protocol\raknet\RaknetPacket;
 
-class UnknownPacket extends Packet {
+class UnknownPacket extends RaknetPacket {
 
     /**
      * @param string $buf

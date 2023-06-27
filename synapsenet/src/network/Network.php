@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace synapsenet\network;
 
 use synapsenet\core\CoreServer;
+use synapsenet\network\protocol\PacketHandler;
 use synapsenet\network\protocol\ServerSocket;
-use synapsenet\network\protocol\packets\PacketHandler;
 
 class Network {
 

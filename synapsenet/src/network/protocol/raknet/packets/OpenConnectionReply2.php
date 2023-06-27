@@ -2,26 +2,29 @@
 
 declare(strict_types=1);
 
-namespace synapsenet\network\protocol\packets\handshake;
+namespace synapsenet\network\protocol\raknet\packets;
 
 use synapsenet\binary\Binary;
-use synapsenet\network\protocol\packets\Packet;
-use synapsenet\network\protocol\packets\PacketIdentifiers;
-use synapsenet\network\protocol\packets\PacketWrite;
+use synapsenet\network\Address;
+use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class OpenConnectionReply1 extends Packet implements PacketWrite {
+class OpenConnectionReply2 extends RaknetPacket {
 
     /** @var int */
-    private int $packetId = PacketIdentifiers::OPEN_CONNECTION_REPLY_1;
+    private int $packetId = RaknetPacketIds::OPEN_CONNECTION_REPLY_2;
 
     /** @var int */
     public int $serverGuid;
 
-    /** @var bool */
-    public bool $useSecurity;
+    /** @var Address */
+    public Address $clientAddress;
 
     /** @var int */
     public int $mtuSize;
+
+    /** @var bool */
+    public bool $encryptionEnabled;
 
     public function __construct() {
         parent::__construct($this->packetId, "");
@@ -34,8 +37,9 @@ class OpenConnectionReply1 extends Packet implements PacketWrite {
         $this->buffer .= chr($this->getPacketId());
         $this->buffer .= $this->magic;
         $this->buffer .= Binary::writeLong($this->serverGuid);
-        $this->buffer .= Binary::writeBool($this->useSecurity);
+        $this->buffer .= $this->getAddressBuffer($this->clientAddress);
         $this->buffer .= Binary::writeShort($this->mtuSize);
+        $this->buffer .= Binary::writeBool($this->encryptionEnabled);
 
         return $this->buffer;
     }

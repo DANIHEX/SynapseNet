@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace synapsenet\network\protocol\packets;
+namespace synapsenet\network\protocol\raknet;
 
 use synapsenet\binary\Buffer;
 
-abstract class Packet extends Buffer {
+abstract class RaknetPacket extends Buffer {
 
     /** @var int */
     private int $id;

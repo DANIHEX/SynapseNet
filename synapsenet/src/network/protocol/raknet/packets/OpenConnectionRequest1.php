@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace synapsenet\network\protocol\packets\handshake;
+namespace synapsenet\network\protocol\raknet\packets;
 
-use synapsenet\network\protocol\packets\Packet;
-use synapsenet\network\protocol\packets\PacketIdentifiers;
-use synapsenet\network\protocol\packets\PacketRead;
+use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class OpenConnectionRequest1 extends Packet implements PacketRead {
+class OpenConnectionRequest1 extends RaknetPacket {
 
     /** @var int */
-    private int $packetId = PacketIdentifiers::OPEN_CONNECTION_REQUEST_1;
+    private int $packetId = RaknetPacketIds::OPEN_CONNECTION_REQUEST_1;
 
     /** @var int */
     public int $protocol;

@@ -62,10 +62,10 @@ class Buffer {
     public function getAddress(string $buffer): Address {
         $buffer = new Buffer($buffer);
         $version = ord($buffer->get(1));
-        $ip = "0:0:0:0";
+        $ip = "0.0.0.0";
         $port = 0;
         if($version === 4) {
-            $ip = ord($buffer->get(1)) . ":" . ord($buffer->get(1)) . ":" . ord($buffer->get(1)) . ":" . ord($buffer->get(1));
+            $ip = ord($buffer->get(1)) . "." . ord($buffer->get(1)) . "." . ord($buffer->get(1)) . "." . ord($buffer->get(1));
             $port = Binary::readShort($buffer->get(2));
         }
 
@@ -78,7 +78,7 @@ class Buffer {
      * @return string
      */
     public function getAddressBuffer(Address $address): string {
-        $parts = explode(":", $address->getIp());
+        $parts = explode(".", $address->getIp());
         $buf = chr($address->getVersion());
         $buf .= chr(intval($parts[0]));
         $buf .= chr(intval($parts[1]));

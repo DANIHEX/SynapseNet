@@ -2,21 +2,20 @@
 
 declare(strict_types=1);
 
-namespace synapsenet\network\protocol\packets\handshake;
+namespace synapsenet\network\protocol\raknet\packets;
 
 use synapsenet\binary\Binary;
-use synapsenet\network\protocol\packets\Packet;
-use synapsenet\network\protocol\packets\PacketIdentifiers;
-use synapsenet\network\protocol\packets\PacketRead;
+use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class UnconnectedPing extends Packet implements PacketRead {
+class UnconnectedPing extends RaknetPacket {
 
     /**
      * PacketIdentifiers::UNCONNECTED_PING_OPEN ??
      * 
      * @var int
      */
-    private int $packetId = PacketIdentifiers::UNCONNECTED_PING;
+    private int $packetId = RaknetPacketIds::UNCONNECTED_PING;
 
     /** @var int */
     public int $time;
