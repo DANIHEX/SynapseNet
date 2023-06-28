@@ -8,6 +8,7 @@ use synapsenet\core\CoreServer;
 use synapsenet\network\Address;
 use synapsenet\network\protocol\raknet\packets\ConnectedPong;
 use synapsenet\network\protocol\raknet\packets\ConnectionRequestAccepted;
+use synapsenet\network\protocol\raknet\packets\FrameSetPacket;
 use synapsenet\network\protocol\raknet\packets\OpenConnectionReply1;
 use synapsenet\network\protocol\raknet\packets\OpenConnectionReply2;
 use synapsenet\network\protocol\raknet\packets\UnconnectedPong;
@@ -71,7 +72,13 @@ class RaknetPacketHandler {
      * @return void
      */
     public function handle(string $buffer, string $source, int $port): void {
-        $packet = RaknetPacketMap::match($buffer);
+        $packet = null;
+        if(ord($buffer[0]) > 0x80 or ord($buffer[0]) < 0x8d){
+            $packet = new FrameSetPacket(ord($buffer[0]), $buffer);
+            $packet->extract();
+        } else {
+            $packet = RaknetPacketMap::match($buffer);
+        }
         if($packet instanceof UnknownPacket) {
             CoreServer::getInstance()->getLogger()->info("Unknown packet with id(" . $packet->getPacketId() . ") received. Source: " . $source . ":" . $port);
             return;
@@ -104,6 +111,7 @@ class RaknetPacketHandler {
                 $pk->serverGuid = $this->getRandomId();
                 $pk->useSecurity = false;
                 $pk->mtuSize = $packet->getMtuSize();
+                echo "MTU Size: " . $packet->getMtuSize();
                 $this->sendPacket($pk, $source, $port);
                 break;
             case RaknetPacketIds::OPEN_CONNECTION_REQUEST_2:
