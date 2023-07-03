@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace synapsenet\network\protocol;
 
-use synapsenet\binary\Buffer;
+use Exception;
 use synapsenet\core\CoreServer;
 use synapsenet\network\protocol\raknet\RaknetPacketHandler;
 
@@ -15,8 +15,6 @@ class PacketHandler {
     public ServerSocket $socket;
 
     public RaknetPacketHandler $raknet;
-
-    // public RaknetPacketHandler $bedrock;
 
     /**
      * @param CoreServer $server
@@ -51,19 +49,20 @@ class PacketHandler {
         return $this->raknet;
     }
 
-    public function proccess(){
-        $this->getSocket()->read($buf, $source, $port);
+    /**
+     * @throws Exception
+     */
+    public function process(): void {
+        $this->getSocket()->read($buffer, $source, $port);
 
-        if(is_null($buf)) return;
+        if(is_null($buffer)) return;
 
-        $buffer = new Buffer($buf);
-        $id = $buffer->get(1);
-        switch($id){
+        switch(ord($buffer[0])){
             case 0xfe:
                 // TODO: Bedrock Packet
                 break;
             default:
-                $this->getRaknetHandler()->handle($buf, $source, $port);
+                $this->getRaknetHandler()->handle($buffer, $source, $port);
         }
     }
 

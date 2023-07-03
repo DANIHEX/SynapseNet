@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace synapsenet\network;
 
+use Exception;
 use synapsenet\core\CoreServer;
 use synapsenet\network\protocol\PacketHandler;
 use synapsenet\network\protocol\ServerSocket;
@@ -30,6 +31,11 @@ class Network {
     private PacketHandler $packetHandler;
 
     /**
+     * @var ConnectionManager
+     */
+    public ConnectionManager $connectionManager;
+
+    /**
      * @param CoreServer $server
      * @param string $ip
      * @param string $ip6
@@ -43,6 +49,7 @@ class Network {
         $this->ip6 = $ip6;
         $this->port = $port;
         $this->port6 = $port6;
+        $this->connectionManager = new ConnectionManager();
     }
 
     /**
@@ -95,9 +102,18 @@ class Network {
     }
 
     /**
+     * @return ConnectionManager
+     */
+    public function getConnectionManager(): ConnectionManager {
+        return $this->connectionManager;
+    }
+
+    /**
      * @return void
+     * @throws Exception
      */
     public function start(): void {
         $this->packetHandler = new PacketHandler($this->getServer(), new ServerSocket($this->getIp(), $this->getPort(), 4), $this->getRandomId());
     }
+
 }

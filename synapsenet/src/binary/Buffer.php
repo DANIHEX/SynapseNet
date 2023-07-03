@@ -95,4 +95,11 @@ class Buffer {
     public function getRemaining(): string {
         return substr($this->buffer, $this->offset);
     }
+
+    /**
+     * @return bool
+     */
+    public function ended(): bool {
+        return $this->offset >= strlen($this->buffer);
+    }
 }

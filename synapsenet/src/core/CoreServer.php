@@ -342,13 +342,13 @@ class CoreServer {
         $this->logger->info("Server started on " . $this->getIp() . ":" . $this->getPort());
         $this->status->startWaching();
         $this->onair = true;
-        $this->proccess();
+        $this->process();
     }
 
     /**
      * @return void
      */
-    private function proccess(): void {
+    private function process(): void {
         $this->nextTick = microtime(true);
 
         while($this->onair) {
@@ -371,7 +371,7 @@ class CoreServer {
 
         $this->query->generateQuery($this->getName(), count($this->getOnlinePlayers()), $this->getMaxPlayers(), $this->getServerUid(), $this->getMotq(), $this->getDefaultGameMode(true), $this->getDefaultGameMode(), $this->getPort(), $this->getPort6());
 
-        $this->network->getPacketHandler()->proccess();
+        $this->network->getPacketHandler()->process();
 
 
         if($this->performanceMode !== CoreServer::PERFORMANCE_MAX) {

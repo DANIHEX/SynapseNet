@@ -46,4 +46,11 @@ class Address {
     public function getPort(): int {
         return $this->port;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string {
+        return $this->getIp() . ":" . $this->getPort();
+    }
 }

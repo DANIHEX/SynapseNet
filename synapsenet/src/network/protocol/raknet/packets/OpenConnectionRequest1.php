@@ -43,6 +43,7 @@ class OpenConnectionRequest1 extends RaknetPacket {
 
     /**
      * @return OpenConnectionRequest1
+     * @throws \Exception
      */
     public function extract(): OpenConnectionRequest1 {
         $this->get(1);
