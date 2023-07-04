@@ -13,12 +13,16 @@ class ConnectionManager {
         
     }
 
+    public function isConnected(Address $address): bool {
+        return isset($this->pool[$address->string()]);
+    }
+
     /**
      * @param Connection $connection
      * @return void
      */
     public function addNewConnection(Connection $connection): void {
-        $this->pool[$connection->getGuid()] = $connection;
+        $this->pool[$connection->getAddress()->string()] = $connection;
     }
 
     /**

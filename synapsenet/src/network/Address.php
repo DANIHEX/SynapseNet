@@ -50,6 +50,13 @@ class Address {
     /**
      * @return string
      */
+    public function string(): string {
+        return $this->getIp() . ":" . $this->getPort();
+    }
+
+    /**
+     * @return string
+     */
     public function __toString(): string {
         return $this->getIp() . ":" . $this->getPort();
     }

@@ -62,7 +62,6 @@ class RaknetPacketHandler {
      * @param RaknetPacket $packet
      * @param string $dest
      * @param int $port
-     *
      * @return void
      */
     public function sendPacket(RaknetPacket $packet, string $dest, int $port): void {
@@ -70,26 +69,16 @@ class RaknetPacketHandler {
         ServerSocket::getInstance()->write($packet->make(), $dest, $port);
     }
 
+
     /**
-     * @param RaknetPacket $packet
+     * @param string $buffer
      * @param string $source
      * @param int $port
-     *
      * @return void
      */
     public function handle(string $buffer, string $source, int $port): void {
-        $packet = null;
-        // Handle connected packets:
-        if(isset($this->sessions[$source . ":" . $port])){
-            $address = $this->sessions[$source . ":" . $port][0];
-            $protocol = $this->sessions[$source . ":" . $port][1];
-            $guid = $this->sessions[$source . ":" . $port][2];
-            $connection = new Connection($address, $protocol, $guid);
-            $connection->handle($buffer);
-        }
-
-        // Handle unconnected packets:
         $packet = RaknetPacketMap::match($buffer);
+
         if($packet instanceof UnknownPacket){
             CoreServer::getInstance()->getLogger()->info("Unknown packet with id(" . $packet->getPacketId() . ") received. Source: " . $source . ":" . $port);
             return;
@@ -98,10 +87,10 @@ class RaknetPacketHandler {
         CoreServer::getInstance()->getLogger()->info("Packet with id(" . $packet->getPacketId() . ") received. Source: " . $source . ":" . $port);
 
         switch($packet->getPacketId()) {
-            case RaknetPacketIds::CONNECTED_PING:
-                /** @var ConnectedPing $packet */
-                $this->handleConnectedPing($packet, $source, $port);
-                break;
+//            case RaknetPacketIds::CONNECTED_PING:
+//                /** @var ConnectedPing $packet */
+//                $this->handleConnectedPing($packet, $source, $port);
+//                break;
             case RaknetPacketIds::UNCONNECTED_PING:
             case RaknetPacketIds::UNCONNECTED_PING_OPEN:
                 /** @var UnconnectedPing $packet */
@@ -115,28 +104,28 @@ class RaknetPacketHandler {
                 /** @var OpenConnectionRequest2 $packet */
                 $this->handleOpenConnectionRequest2($packet, $source, $port);
                 break;
-            case RaknetPacketIds::CONNECTION_REQUEST:
-                /** @var ConnectionRequest $packet */
-                $this->handleConnectionRequest($packet, $source, $port);
-                break;
-            case RaknetPacketIds::NEW_INCOMING_CONNECTION:
-
-                break;
+//            case RaknetPacketIds::CONNECTION_REQUEST:
+//                /** @var ConnectionRequest $packet */
+//                $this->handleConnectionRequest($packet, $source, $port);
+//                break;
+//            case RaknetPacketIds::NEW_INCOMING_CONNECTION:
+//
+//                break;
         }
     }
 
-    /**
-     * @param ConnectedPing $packet
-     * @param string $source
-     * @param int $port
-     * @return void
-     */
-    public function handleConnectedPing(ConnectedPing $packet, string $source, int $port): void {
-        $pk = new ConnectedPong();
-        $pk->pingTime = $packet->getTime();
-        $pk->pongTime = time();
-        $this->sendPacket($pk, $source, $port);
-    }
+//    /**
+//     * @param ConnectedPing $packet
+//     * @param string $source
+//     * @param int $port
+//     * @return void
+//     */
+//    public function handleConnectedPing(ConnectedPing $packet, string $source, int $port): void {
+//        $pk = new ConnectedPong();
+//        $pk->pingTime = $packet->getTime();
+//        $pk->pongTime = time();
+//        $this->sendPacket($pk, $source, $port);
+//    }
 
     /**
      * @param UnconnectedPing $packet
@@ -183,19 +172,21 @@ class RaknetPacketHandler {
         $pk->mtuSize = $packet->getMtuSize();
         $pk->encryptionEnabled = false;
         $this->sendPacket($pk, $source, $port);
+        $connection = new Connection();
     }
 
-    /**
-     * @param ConnectionRequest $packet
-     * @param string $source
-     * @param int $port
-     * @return void
-     */
-    public function handleConnectionRequest(ConnectionRequest $packet, string $source, int $port): void {
-        $guid = $packet->getGuid();
-        $pk = new ConnectionRequestAccepted();
-        $pk->clientAddress = $this->sessions[$guid];
-        $pk->requestTime = $packet->getTime();
-        $pk->time = time();
-    }
+//    /**
+//     * @param ConnectionRequest $packet
+//     * @param string $source
+//     * @param int $port
+//     * @return void
+//     */
+//    public function handleConnectionRequest(ConnectionRequest $packet, string $source, int $port): void {
+//        $guid = $packet->getGuid();
+//        $pk = new ConnectionRequestAccepted();
+//        $pk->clientAddress = $this->sessions[$guid];
+//        $pk->requestTime = $packet->getTime();
+//        $pk->time = time();
+//        $this->sendPacket($pk, $source, $port);
+//    }
 }

@@ -113,7 +113,8 @@ class Network {
      * @throws Exception
      */
     public function start(): void {
-        $this->packetHandler = new PacketHandler($this->getServer(), new ServerSocket($this->getIp(), $this->getPort(), 4), $this->getRandomId());
+        $this->connectionManager = new ConnectionManager();
+        $this->packetHandler = new PacketHandler($this->getServer(), new ServerSocket($this->getIp(), $this->getPort(), 4));
     }
 
 }

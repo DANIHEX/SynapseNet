@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace synapsenet\network\protocol\raknet;
+namespace synapsenet\network\protocol;
 
 use synapsenet\binary\Buffer;
 
-class RaknetPacket extends Buffer {
+abstract class Packet extends Buffer {
 
     /** @var int */
     private int $id;
-    
+
     /** @var string */
     public string $magic = "\x00\xff\xff\x00\xfe\xfe\xfe\xfe\xfd\xfd\xfd\xfd\x12\x34\x56\x78";
 
@@ -31,6 +31,9 @@ class RaknetPacket extends Buffer {
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
     public function getMagic(): string {
         return $this->magic;
     }
@@ -51,9 +54,7 @@ class RaknetPacket extends Buffer {
         return $this->buffer;
     }
 
-    // public abstract function getDataArray(): array;
+    public abstract function extract(): Packet;
 
-    // public abstract function extract(): Packet;
-
-    // public abstract function make(): string;
+    public abstract function make(): string;
 }
