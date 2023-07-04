@@ -148,11 +148,44 @@ class Chunk {
     public function setRuntimeID($runtimeID) {
         $this->runtimeID = $runtimeID;
     }
+
+    public function setBlockId($x, $y, $z, $blockId) {
+        $index = $y >> 4;
+        if ($index < self::MAXSUBCHUNKS && $index >= 0) {
+            if (!$this->subChunks->contains($index)) {
+                $this->subChunks[$index] = new SubChunk($this->runtimeID);
+            }
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->setBlockId($x & 0x0f, $y & 0x0f, $z & 0x0f, $blockId);
+        }
+    }
+
+    public function getBlockId($x, $y, $z) {
+        $index = $y >> 4;
+        if ($this->subChunks->contains($index)) {
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->getBlockId($x & 0x0f, $y & 0x0f, $z & 0x0f);
+        }
+        return $this->runtimeID;
+    }
+
+    public function setBlockData($x, $y, $z, $data) {
+        $index = $y >> 4;
+        if ($index < self::MAXSUBCHUNKS && $index >= 0) {
+            if (!$this->subChunks->contains($index)) {
+                $this->subChunks[$index] = new SubChunk($this->runtimeID);
+            }
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->setBlockData($x & 0x0f, $y & 0x0f, $z & 0x0f, $data);
+        }
+    }
+
+    public function getBlockData($x, $y, $z) {
+        $index = $y >> 4;
+        if ($this->subChunks->contains($index)) {
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->getBlockData($x & 0x0f, $y & 0x0f, $z & 0x0f);
+        }
+        return 0;
+    }
 }
-
-
-
-
-
-
-
