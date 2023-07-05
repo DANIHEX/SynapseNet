@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace synapsenet\network\protocol\raknet\packets;
 
+use Exception;
 use synapsenet\binary\Binary;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 
-use function PHPSTORM_META\map;
-
-class FrameSetPacket extends RaknetPacket {
-
-    /** @var int */
-    private int $packetId; // Range: 0x80 to 0x8d
+class FrameSetPacket extends Packet {
 
     /** @var int */
     public int $protocol;
@@ -21,11 +17,17 @@ class FrameSetPacket extends RaknetPacket {
     public int $mtuSize;
 
     /**
-     * @param string $buffer
+     * @var int
      */
-    public function __construct(int $packetId, string $buffer) {
-        $this->packetId = $packetId;
-        parent::__construct($this->packetId, $buffer);
+    public int $sequenceNumber;
+
+    /**
+     * @param int $id
+     * @param string $buffer
+     * @throws Exception
+     */
+    public function __construct(int $id, string $buffer) {
+        parent::__construct($id, $buffer);
 
         $this->extract();
     }
@@ -46,6 +48,7 @@ class FrameSetPacket extends RaknetPacket {
 
     /**
      * @return FrameSetPacket
+     * @throws Exception
      */
     public function extract(): FrameSetPacket {
         $this->get(1);
@@ -53,6 +56,11 @@ class FrameSetPacket extends RaknetPacket {
         $flags = decbin(ord($this->get(1)));
 
         return $this;
+    }
+
+    public function make(): string {
+        $buffer = "";
+        return $buffer;
     }
 
     private function getReliablityType(string $bits): int {
@@ -65,6 +73,6 @@ class FrameSetPacket extends RaknetPacket {
             "" => 5,
             "" => 6,
             "" => 7
-        }
+        };
     }
 }

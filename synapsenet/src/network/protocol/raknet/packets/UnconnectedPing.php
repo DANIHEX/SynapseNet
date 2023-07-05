@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace synapsenet\network\protocol\raknet\packets;
 
+use Exception;
 use synapsenet\binary\Binary;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class UnconnectedPing extends RaknetPacket {
+class UnconnectedPing extends Packet {
 
     /**
      * PacketIdentifiers::UNCONNECTED_PING_OPEN ??
@@ -28,6 +29,7 @@ class UnconnectedPing extends RaknetPacket {
 
     /**
      * @param string $buffer
+     * @throws Exception
      */
     public function __construct(string $buffer) {
         parent::__construct($this->packetId, $buffer);
@@ -58,6 +60,7 @@ class UnconnectedPing extends RaknetPacket {
 
     /**
      * @return UnconnectedPing
+     * @throws Exception
      */
     public function extract(): UnconnectedPing {
         $this->get(1);
@@ -66,5 +69,13 @@ class UnconnectedPing extends RaknetPacket {
         $this->clientUid = Binary::readLong($this->get(8));
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function make(): string {
+        $buffer = "";
+        return $buffer;
     }
 }

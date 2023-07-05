@@ -23,7 +23,7 @@ class Connection {
      * @param int $guid
      */
     public function __construct(Address $address, int $protocol, int $guid){
-        $this->$address = $address;
+        $this->address = $address;
         $this->protocol = $protocol;
         $this->guid = $guid;
     }
@@ -67,6 +67,10 @@ class Connection {
      * @return void
      */
     public function handle(string $buffer) {
+        
+    }
+
+    public function disconnect(){
         
     }
 

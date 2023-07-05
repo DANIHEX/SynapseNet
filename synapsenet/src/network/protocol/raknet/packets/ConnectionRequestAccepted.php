@@ -6,10 +6,10 @@ namespace synapsenet\network\protocol\raknet\packets;
 
 use synapsenet\binary\Binary;
 use synapsenet\network\Address;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class ConnectionRequestAccepted extends RaknetPacket {
+class ConnectionRequestAccepted extends Packet {
 
     /** @var int */
     private int $packetId = RaknetPacketIds::CONNECTION_REQUEST_ACCEPTED;
@@ -33,6 +33,10 @@ class ConnectionRequestAccepted extends RaknetPacket {
 
     public function __construct() {
         parent::__construct($this->packetId, "");
+    }
+
+    public function extract(): ConnectionRequestAccepted {
+        return $this;
     }
 
     /**

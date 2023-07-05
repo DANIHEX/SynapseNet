@@ -8,6 +8,7 @@ use Exception;
 use synapsenet\core\CoreServer;
 use synapsenet\network\Address;
 use synapsenet\network\ConnectionManager;
+use synapsenet\network\Network;
 use synapsenet\network\protocol\raknet\Handshake;
 use synapsenet\network\protocol\raknet\RaknetPacketHandler;
 
@@ -68,7 +69,7 @@ class PacketHandler {
      * @return ConnectionManager
      */
     public function getConnectionManager(): ConnectionManager {
-        return $this->getServer()->getNetwork()->getConnectionManager();
+        return Network::getInstance()->getConnectionManager();
     }
 
     /**
@@ -85,18 +86,19 @@ class PacketHandler {
      * @param $buffer
      * @return void
      */
-    public function receive(&$address, &$buffer): void {
+    public function receive(&$buffer, &$source, &$port): void {
         $this->getSocket()->read($buffer, $source, $port);
-        $address = new Address(4, $source, $port);
     }
 
     /**
      * @throws Exception
      */
     final public function process(): void {
-        $this->receive($address, $buffer);
+        $this->receive($buffer, $source, $port);
 
         if(is_null($buffer)) return;
+
+        $address = new Address(4, $source, $port);
 
         if($this->getConnectionManager()->isConnected($address)){
             $connection = $this->getConnectionManager()->getConnection($address);

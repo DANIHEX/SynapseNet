@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace synapsenet\network\protocol\raknet\packets;
 
 use synapsenet\binary\Binary;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class OpenConnectionReply1 extends RaknetPacket {
+class OpenConnectionReply1 extends Packet {
 
     /** @var int */
     private int $packetId = RaknetPacketIds::OPEN_CONNECTION_REPLY_1;
@@ -24,6 +24,13 @@ class OpenConnectionReply1 extends RaknetPacket {
 
     public function __construct() {
         parent::__construct($this->packetId, "");
+    }
+
+    /**
+     * @return $this
+     */
+    public function extract(): OpenConnectionReply1 {
+        return $this;
     }
 
     /**

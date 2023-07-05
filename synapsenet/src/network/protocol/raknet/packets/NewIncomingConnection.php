@@ -1,14 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace synapsenet\network\protocol\raknet\packets;
 
+use Exception;
 use synapsenet\network\Address;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class NewIncomingAddress extends RaknetPacket {
+class NewIncomingConnection extends Packet {
 
     /** @var int */
     private int $packetId = RaknetPacketIds::NEW_INCOMING_CONNECTION;
@@ -21,6 +20,7 @@ class NewIncomingAddress extends RaknetPacket {
 
     /**
      * @param string $buffer
+     * @throws Exception
      */
     public function __construct(string $buffer) {
         parent::__construct($this->packetId, $buffer);
@@ -43,13 +43,20 @@ class NewIncomingAddress extends RaknetPacket {
     }
 
     /**
-     * @return NewIncomingAddress
+     * @return NewIncomingConnection
+     * @throws Exception
      */
-    public function extract(): NewIncomingAddress {
+    public function extract(): NewIncomingConnection {
         $this->get(1);
         $this->serverAddress = $this->getAddress($this->get(7));
         $this->internalAddress = $this->getAddress($this->get(7));
 
         return $this;
     }
+
+    public function make(): string {
+        $buffer = "";
+        return $buffer;
+    }
+
 }

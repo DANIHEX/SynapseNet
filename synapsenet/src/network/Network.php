@@ -11,6 +11,11 @@ use synapsenet\network\protocol\ServerSocket;
 
 class Network {
 
+    /**
+     * @var Network
+     */
+    private static Network $instance;
+
     /** @var CoreServer */
     public CoreServer $server;
 
@@ -36,13 +41,20 @@ class Network {
     public ConnectionManager $connectionManager;
 
     /**
+     * @var int
+     */
+    public int $mtuSize;
+
+    /**
      * @param CoreServer $server
      * @param string $ip
      * @param string $ip6
      * @param int $port
      * @param int $port6
+     * @param int $mtuSize
      */
-    public function __construct(CoreServer $server, string $ip, string $ip6, int $port, int $port6) {
+    public function __construct(CoreServer $server, string $ip, string $ip6, int $port, int $port6, int $mtuSize = 1500) {
+        self::$instance = $this;
         $this->server = $server;
         $this->randId = mt_rand(0, PHP_INT_MAX);
         $this->ip = $ip;
@@ -50,6 +62,14 @@ class Network {
         $this->port = $port;
         $this->port6 = $port6;
         $this->connectionManager = new ConnectionManager();
+        $this->mtuSize = $mtuSize;
+    }
+
+    /**
+     * @return Network
+     */
+    public static function getInstance(): Network {
+        return self::$instance;
     }
 
     /**
@@ -106,6 +126,21 @@ class Network {
      */
     public function getConnectionManager(): ConnectionManager {
         return $this->connectionManager;
+    }
+
+    /**
+     * @param int $size
+     * @return void
+     */
+    public function setMtuSize(int $size): void {
+        $this->mtuSize = $size;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMtuSize(): int {
+        return $this->mtuSize;
     }
 
     /**

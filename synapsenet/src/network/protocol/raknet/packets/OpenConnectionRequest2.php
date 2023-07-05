@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace synapsenet\network\protocol\raknet\packets;
 
+use Exception;
 use synapsenet\binary\Binary;
 use synapsenet\network\Address;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class OpenConnectionRequest2 extends RaknetPacket {
+class OpenConnectionRequest2 extends Packet {
 
     /** @var int */
     private int $packetId = RaknetPacketIds::OPEN_CONNECTION_REQUEST_2;
@@ -25,6 +26,7 @@ class OpenConnectionRequest2 extends RaknetPacket {
 
     /**
      * @param string $buffer
+     * @throws Exception
      */
     public function __construct(string $buffer) {
         parent::__construct($this->packetId, $buffer);
@@ -54,7 +56,8 @@ class OpenConnectionRequest2 extends RaknetPacket {
     }
 
     /**
-     * @return UnconnectedPing
+     * @return OpenConnectionRequest2
+     * @throws Exception
      */
     public function extract(): OpenConnectionRequest2 {
         $this->get(1);
@@ -63,5 +66,13 @@ class OpenConnectionRequest2 extends RaknetPacket {
         $this->clientGuid = Binary::readLong($this->get(8));
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function make(): string {
+        $buffer = "";
+        return $buffer;
     }
 }

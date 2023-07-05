@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace synapsenet\network\protocol\raknet\packets;
 
+use Exception;
 use synapsenet\binary\Binary;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class ConnectionRequest extends RaknetPacket {
+class ConnectionRequest extends Packet {
 
     /** @var int */
     private int $packetId = RaknetPacketIds::CONNECTION_REQUEST;
@@ -44,6 +45,7 @@ class ConnectionRequest extends RaknetPacket {
 
     /**
      * @return ConnectionRequest
+     * @throws Exception
      */
     public function extract(): ConnectionRequest {
         $this->get(1);
@@ -51,5 +53,13 @@ class ConnectionRequest extends RaknetPacket {
         $this->time = Binary::readLong($this->get(8));
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function make(): string {
+        $buffer = "";
+        return $buffer;
     }
 }

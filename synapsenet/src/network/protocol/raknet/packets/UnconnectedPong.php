@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace synapsenet\network\protocol\raknet\packets;
 
 use synapsenet\binary\Binary;
-use synapsenet\network\protocol\raknet\RaknetPacket;
+use synapsenet\network\protocol\Packet;
 use synapsenet\network\protocol\raknet\RaknetPacketIds;
 
-class UnconnectedPong extends RaknetPacket {
+class UnconnectedPong extends Packet {
 
     /** @var int */
     private int $packetId = RaknetPacketIds::UNCONNECTED_PONG;
@@ -24,6 +24,13 @@ class UnconnectedPong extends RaknetPacket {
 
     public function __construct() {
         parent::__construct($this->packetId, "");
+    }
+
+    /**
+     * @return $this
+     */
+    public function extract(): UnconnectedPong {
+        return $this;
     }
 
     /**
