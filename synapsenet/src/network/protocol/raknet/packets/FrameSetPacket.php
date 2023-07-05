@@ -7,6 +7,7 @@ namespace synapsenet\network\protocol\raknet\packets;
 use Exception;
 use synapsenet\binary\Binary;
 use synapsenet\network\protocol\Packet;
+use synapsenet\network\protocol\raknet\ReliabilityType;
 
 class FrameSetPacket extends Packet {
 
@@ -156,28 +157,24 @@ class FrameSetPacket extends Packet {
     public function extract(): FrameSetPacket {
         $this->get(1);
         $this->sequenceNumber = Binary::readLTriad($this->get(3));
-        $flags = decbin(ord($this->get(1)));
-        $this->reliable = $flags[0] === 1;
-        $this->ordered = $flags[1] === 1;
-        $this->sequenced = $flags[2] === 1;
-        $this->fragmented = $flags[3] === 1;
+        $flags = $this->get(1);
         $this->length = Binary::readShort($this->get(2));
-        if($this->reliable){
+        if(ReliabilityType::reliable($flags)){
             $this->reliableFrameIndex = Binary::readLTriad($this->get(3));
         }
-        if($this->sequenced){
+        if(ReliabilityType::ordered($flags)){
             $this->sequencedFrameIndex = Binary::readLTriad($this->get(3));
         }
-        if($this->ordered){
+        if(ReliabilityType::sequenced($flags)){
             $this->order[0] = Binary::readLTriad($this->get(3));
             $this->order[1] = $this->get(1);
         }
-        if($this->fragmented){
-            $this->fragment[0] = Binary::readInt($this->get(8));
+        if((($flags >> 4) & 0b0001) === 1){
+            $this->fragment[0] = Binary::readInt($this->get(4));
             $this->fragment[1] = Binary::readShort($this->get(2));
-            $this->fragment[2] = Binary::readInt($this->get(8));
+            $this->fragment[2] = Binary::readInt($this->get(4));
         }
-        $this->body = $this->get(ceil($this->length / 8));
+        $this->body = $this->get(intval(ceil($this->length / 8)));
 
         return $this;
     }

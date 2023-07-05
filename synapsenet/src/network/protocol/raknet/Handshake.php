@@ -60,7 +60,12 @@ class Handshake {
 
         // Ignore unknown unconnected packets
         // TODO: Or maybe handle them later
-        if($packet instanceof UnknownPacket) return;
+        if($packet instanceof UnknownPacket){
+            CoreServer::getInstance()->getLogger()->info("Unknown packet received: " . $packet->getPacketId());
+            return;
+        }
+
+        CoreServer::getInstance()->getLogger()->info("Unconnected packet received: " . $packet->getPacketId());
 
         switch($packet->getPacketId()){
             case RaknetPacketIds::UNCONNECTED_PING:
@@ -76,6 +81,7 @@ class Handshake {
                 /** @var OpenConnectionRequest2 $packet */
                 $this->handleOpenConnectionRequest2($address, $packet);
                 $this->openConnection($address);
+                CoreServer::getInstance()->getLogger()->info("Connection opened for " . $address->string());
                 break;
         }
     }

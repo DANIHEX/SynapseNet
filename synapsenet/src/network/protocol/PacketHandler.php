@@ -79,6 +79,7 @@ class PacketHandler {
      */
     public function send(Address $address, Packet $packet): void {
         $this->getSocket()->write($packet->make(), $address->getIp(), $address->getPort());
+        CoreServer::getInstance()->getLogger()->info("Packet sent: " . $packet->getPacketId());
     }
 
     /**

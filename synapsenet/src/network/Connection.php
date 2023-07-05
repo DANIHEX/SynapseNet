@@ -4,6 +4,7 @@ namespace synapsenet\network;
 
 use Exception;
 use synapsenet\binary\Buffer;
+use synapsenet\core\CoreServer;
 use synapsenet\network\protocol\raknet\packets\FrameSetPacket;
 
 class Connection {
@@ -73,7 +74,8 @@ class Connection {
      */
     public function handle(string $buffer): void {
         $pid = ord($buffer[0]);
-        if($pid >= ord(0x80) and $pid <= ord(0x8d)){
+        CoreServer::getInstance()->getLogger()->info("Connected packet received: " . $pid);
+        if($pid >= 0x80 and $pid <= 0x8d){
             $packet = new FrameSetPacket($pid, $buffer);
             $this->handleFrameSet($packet);
         }
@@ -84,7 +86,7 @@ class Connection {
      * @return void
      */
     public function handleFrameSet(FrameSetPacket $packet): void {
-        echo $packet->getBody();
+        CoreServer::getInstance()->getLogger()->info("Frame packet received: " . ord($packet->getBody()[0]));
     }
 
     public function disconnect(){
