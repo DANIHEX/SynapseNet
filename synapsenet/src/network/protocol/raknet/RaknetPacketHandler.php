@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace synapsenet\network\protocol\raknet;
 
+use Exception;
 use synapsenet\core\CoreServer;
 use synapsenet\network\Address;
 use synapsenet\network\Connection;
@@ -75,6 +76,7 @@ class RaknetPacketHandler {
      * @param string $source
      * @param int $port
      * @return void
+     * @throws Exception
      */
     public function handle(string $buffer, string $source, int $port): void {
         $packet = RaknetPacketMap::match($buffer);

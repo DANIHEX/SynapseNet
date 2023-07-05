@@ -137,8 +137,7 @@ class Handshake {
         if(isset($this->temp[$address->string()])){
             $protocol = $this->temp[$address->string()]["protocol"];
             $guid = $this->temp[$address->string()]["guid"];
-            $connection = new Connection($address, $protocol, $guid);
-            Network::getInstance()->getConnectionManager()->connect($connection);
+            Network::getInstance()->getConnectionManager()->connect(new Connection($address, $protocol, $guid));
             unset($this->temp[$address->string()]);
         }
     }

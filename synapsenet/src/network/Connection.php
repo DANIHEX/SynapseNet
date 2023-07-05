@@ -2,6 +2,10 @@
 
 namespace synapsenet\network;
 
+use Exception;
+use synapsenet\binary\Buffer;
+use synapsenet\network\protocol\raknet\packets\FrameSetPacket;
+
 class Connection {
 
     /**
@@ -65,9 +69,22 @@ class Connection {
      *
      * @param string $buffer
      * @return void
+     * @throws Exception
      */
-    public function handle(string $buffer) {
-        
+    public function handle(string $buffer): void {
+        $pid = ord($buffer[0]);
+        if($pid >= ord(0x80) and $pid <= ord(0x8d)){
+            $packet = new FrameSetPacket($pid, $buffer);
+            $this->handleFrameSet($packet);
+        }
+    }
+
+    /**
+     * @param FrameSetPacket $packet
+     * @return void
+     */
+    public function handleFrameSet(FrameSetPacket $packet): void {
+        echo $packet->getBody();
     }
 
     public function disconnect(){

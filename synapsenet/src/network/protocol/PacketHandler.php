@@ -82,8 +82,9 @@ class PacketHandler {
     }
 
     /**
-     * @param $address
      * @param $buffer
+     * @param $source
+     * @param $port
      * @return void
      */
     public function receive(&$buffer, &$source, &$port): void {
