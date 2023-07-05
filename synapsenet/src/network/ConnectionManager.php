@@ -26,28 +26,14 @@ class ConnectionManager {
     }
 
     /**
-     * @param int $guid
+     * @param Address $address
      * @return Connection|null
      */
-    public function getConnectionByGuid(int $guid): ?Connection {
-        if(isset($this->pool[$guid])){
-            return $this->pool[$guid];
+    public function getConnection(Address $address): ?Connection {
+        if(isset($this->pool[$address->string()])){
+            return $this->pool[$address->string()];
         }
         return null;
-    }
-
-    /**
-     * @param int $protocol
-     * @return array
-     */
-    public function getConnectionsByProtocol(int $protocol = 11): array {
-        $connections = [];
-        foreach($this->getPool() as $guid => $connection){
-            if($connection->getProtocol() === $protocol){
-                $connections[$guid] = $connection;
-            }
-        }
-        return $connections;
     }
 
     /**

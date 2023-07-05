@@ -7,26 +7,40 @@ namespace synapsenet\network\protocol;
 use Exception;
 use synapsenet\core\CoreServer;
 use synapsenet\network\Address;
+use synapsenet\network\ConnectionManager;
+use synapsenet\network\protocol\raknet\Handshake;
 use synapsenet\network\protocol\raknet\RaknetPacketHandler;
 
 class PacketHandler {
 
+    /**
+     * @var CoreServer
+     */
     public CoreServer $server;
 
+    /**
+     * @var ServerSocket
+     */
     public ServerSocket $socket;
 
+    /**
+     * @var RaknetPacketHandler
+     */
     public RaknetPacketHandler $raknet;
+
+    /**
+     * @var Handshake
+     */
+    public Handshake $handshake;
 
     /**
      * @param CoreServer $server
      * @param ServerSocket $socket
-     * @param int $randId
      */
     public function __construct(CoreServer $server, ServerSocket $socket) {
         $this->server = $server;
         $this->socket = $socket;
-        // $this->raknet = new RaknetPacketHandler($server, $socket);
-        // $this->bedrock = new BedrockPacketHandler();
+        $this->handshake = new Handshake($this);
     }
 
     /**
@@ -44,10 +58,17 @@ class PacketHandler {
     }
 
     /**
-     * @return RaknetPacketHandler
+     * @return Handshake
      */
-    public function getRaknetHandler(): RaknetPacketHandler {
-        return $this->raknet;
+    public function getHandshake(): Handshake {
+        return $this->handshake;
+    }
+
+    /**
+     * @return ConnectionManager
+     */
+    public function getConnectionManager(): ConnectionManager {
+        return $this->getServer()->getNetwork()->getConnectionManager();
     }
 
     /**
@@ -77,32 +98,12 @@ class PacketHandler {
 
         if(is_null($buffer)) return;
 
-        switch(ord($buffer[0])){
-            case 0xfe:
-                $this->handleBedrock($address, $buffer);
-                break;
-            default:
-                $this->handleRaknet($address, $buffer);
-        }
-    }
-
-    /**
-     * @param Address $address
-     * @param string $buffer
-     * @return void
-     */
-    public function handleRaknet(Address $address, string $buffer): void {
-        if($this->getServer()->getNetwork()->getConnectionManager()->isConnected($address)){
-            // Handle connected packets:
-
+        if($this->getConnectionManager()->isConnected($address)){
+            $connection = $this->getConnectionManager()->getConnection($address);
+            $connection->handle($buffer);
         } else {
-            // Handle unconnected packets:
-
+            $this->getHandshake()->handle($address, $buffer);
         }
-    }
-
-    public function handleBedrock(Address $address, string $buffer){
-        
     }
 
 }

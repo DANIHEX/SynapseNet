@@ -91,19 +91,7 @@ class RaknetPacketHandler {
 //                /** @var ConnectedPing $packet */
 //                $this->handleConnectedPing($packet, $source, $port);
 //                break;
-            case RaknetPacketIds::UNCONNECTED_PING:
-            case RaknetPacketIds::UNCONNECTED_PING_OPEN:
-                /** @var UnconnectedPing $packet */
-                $this->handleUnconnectedPing($packet, $source, $port);
-                break;
-            case RaknetPacketIds::OPEN_CONNECTION_REQUEST_1:
-                /** @var OpenConnectionRequest1 $packet */
-                $this->handleOpenConnectionRequest1($packet, $source, $port);
-                break;
-            case RaknetPacketIds::OPEN_CONNECTION_REQUEST_2:
-                /** @var OpenConnectionRequest2 $packet */
-                $this->handleOpenConnectionRequest2($packet, $source, $port);
-                break;
+
 //            case RaknetPacketIds::CONNECTION_REQUEST:
 //                /** @var ConnectionRequest $packet */
 //                $this->handleConnectionRequest($packet, $source, $port);
@@ -126,55 +114,7 @@ class RaknetPacketHandler {
 //        $pk->pongTime = time();
 //        $this->sendPacket($pk, $source, $port);
 //    }
-
-    /**
-     * @param UnconnectedPing $packet
-     * @param string $source
-     * @param int $port
-     * @return void
-     */
-    public function handleUnconnectedPing(UnconnectedPing $packet, string $source, int $port): void {
-        $pk = new UnconnectedPong();
-        $pk->time = $packet->getTime();
-        $pk->serverGuid = $this->getRandomId();
-        $pk->magic = $packet->getMagic();
-        $pk->serverIdString = $this->server->getQuery()->getQueryString();
-        $this->sendPacket($pk, $source, $port);
-    }
-
-    /**
-     * @param OpenConnectionRequest1 $packet
-     * @param string $source
-     * @param int $port
-     * @return void
-     */
-    public function handleOpenConnectionRequest1(OpenConnectionRequest1 $packet, string $source, int $port): void {
-        $pk = new OpenConnectionReply1();
-        $pk->magic = $packet->getMagic();
-        $pk->serverGuid = $this->getRandomId();
-        $pk->useSecurity = false;
-        $pk->mtuSize = $packet->getMtuSize();
-        echo "MTU Size: " . $packet->getMtuSize();
-        $this->sendPacket($pk, $source, $port);
-    }
-
-    /**
-     * @param OpenConnectionRequest2 $packet
-     * @param string $source
-     * @param int $port
-     * @return void
-     */
-    public function handleOpenConnectionRequest2(OpenConnectionRequest2 $packet, string $source, int $port): void {
-        $pk = new OpenConnectionReply2();
-        $pk->magic = $packet->getMagic();
-        $pk->serverGuid = $this->getRandomId();
-        $pk->clientAddress = new Address(4, $source, $port);
-        $pk->mtuSize = $packet->getMtuSize();
-        $pk->encryptionEnabled = false;
-        $this->sendPacket($pk, $source, $port);
-        $connection = new Connection();
-    }
-
+//
 //    /**
 //     * @param ConnectionRequest $packet
 //     * @param string $source

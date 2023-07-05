@@ -60,16 +60,6 @@ class Connection {
     }
 
     /**
-     * BedrockPacket
-     * Up / Send
-     *
-     * @return void
-     */
-    public function sendBedrockPacket(){
-
-    }
-
-    /**
      * RaknetPacket
      * Down / Receive
      *
@@ -77,17 +67,6 @@ class Connection {
      * @return void
      */
     public function handle(string $buffer) {
-        
-    }
-
-    /**
-     * BedrockPacket
-     * Down / Receive
-     *
-     * @param string $buffer
-     * @return void
-     */
-    public function handleBedrock(string $buffer) {
         
     }
 
