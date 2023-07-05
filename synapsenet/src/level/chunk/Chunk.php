@@ -14,7 +14,7 @@ class Chunk {
         $this->x = $x;
         $this->z = $z;
         $this->runtimeID = $runtimeID;
-        $this->subChunks = new SplObjectStorage();
+        $this->subChunks = new \SplObjectStorage();
         $this->biomes = array_fill(0, self::MAXSUBCHUNKS, new BlockStorage(1));
     }
 
@@ -74,6 +74,117 @@ class Chunk {
                     return $i + 1;
                 }
             }
+        }
+        return 0;
+    }
+
+    public function getBiome($x, $z) {
+        $index = ($z << 4) | $x;
+        return $this->biomes[$index];
+    }
+
+    public function setBiome($x, $z, $biomeId) {
+        $index = ($z << 4) | $x;
+        $this->biomes[$index] = $biomeId;
+    }
+
+    public function getBlock($x, $y, $z) {
+        $index = $y >> 4;
+        if ($this->subChunks->contains($index)) {
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->getBlock($x & 0x0f, $y & 0x0f, $z & 0x0f);
+        }
+        return $this->runtimeID;
+    }
+
+    public function setBlock($x, $y, $z, $blockId, $meta = 0) {
+        $index = $y >> 4;
+        if ($index < self::MAXSUBCHUNKS && $index >= 0) {
+            if (!$this->subChunks->contains($index)) {
+                $this->subChunks[$index] = new SubChunk($this->runtimeID);
+            }
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->setBlock($x & 0x0f, $y & 0x0f, $z & 0x0f, $blockId, $meta);
+        }
+    }
+
+    public function getChunkX() {
+        return $this->x;
+    }
+
+    public function getChunkZ() {
+        return $this->z;
+    }
+
+    public function getSubChunk($y) {
+        if ($this->subChunks->contains($y)) {
+            return $this->subChunks[$y];
+        }
+        return null;
+    }
+
+    public function setSubChunk($y, SubChunk $subChunk) {
+        $this->subChunks[$y] = $subChunk;
+    }
+
+    public function removeSubChunk($y) {
+        if ($this->subChunks->contains($y)) {
+            unset($this->subChunks[$y]);
+        }
+    }
+
+    public function getBiomes() {
+        return $this->biomes;
+    }
+
+    public function setBiomes(array $biomes) {
+        $this->biomes = $biomes;
+    }
+
+    public function getRuntimeID() {
+        return $this->runtimeID;
+    }
+
+    public function setRuntimeID($runtimeID) {
+        $this->runtimeID = $runtimeID;
+    }
+
+    public function setBlockId($x, $y, $z, $blockId) {
+        $index = $y >> 4;
+        if ($index < self::MAXSUBCHUNKS && $index >= 0) {
+            if (!$this->subChunks->contains($index)) {
+                $this->subChunks[$index] = new SubChunk($this->runtimeID);
+            }
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->setBlockId($x & 0x0f, $y & 0x0f, $z & 0x0f, $blockId);
+        }
+    }
+
+    public function getBlockId($x, $y, $z) {
+        $index = $y >> 4;
+        if ($this->subChunks->contains($index)) {
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->getBlockId($x & 0x0f, $y & 0x0f, $z & 0x0f);
+        }
+        return $this->runtimeID;
+    }
+
+    public function setBlockData($x, $y, $z, $data) {
+        $index = $y >> 4;
+        if ($index < self::MAXSUBCHUNKS && $index >= 0) {
+            if (!$this->subChunks->contains($index)) {
+                $this->subChunks[$index] = new SubChunk($this->runtimeID);
+            }
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->setBlockData($x & 0x0f, $y & 0x0f, $z & 0x0f, $data);
+        }
+    }
+
+    public function getBlockData($x, $y, $z) {
+        $index = $y >> 4;
+        if ($this->subChunks->contains($index)) {
+            $subChunk = $this->subChunks[$index];
+            return $subChunk->getBlockData($x & 0x0f, $y & 0x0f, $z & 0x0f);
         }
         return 0;
     }

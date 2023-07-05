@@ -8,6 +8,9 @@ use synapsenet\block\BlockFactory;
 use synapsenet\block\BlockIds;
 
 class Flat extends Generator {
+
+    // should make it customisable..
+
     public static $generatorName = "flat";
 
     public function generate($x, $z) {
