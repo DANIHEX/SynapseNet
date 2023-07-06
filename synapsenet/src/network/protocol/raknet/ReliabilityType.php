@@ -4,34 +4,45 @@ namespace synapsenet\network\protocol\raknet;
 
 class ReliabilityType {
 
+    public const FLAGS = 0b11100000;
+
     /**
-     * Reliable: 0b1(0b10000000)
-     *
      * @param $flags
      * @return bool
      */
     public static function reliable($flags): bool {
-        return ($flags >> 7) & 0b1 === 1;
+        $id = ($flags & self::FLAGS) >> 5;
+        return (
+            $id === 2    // Reliable
+            or $id === 3 // Reliable Ordered
+            or $id === 4 // Reliable Sequenced
+            or $id === 6 // Reliable (+ACK)
+            or $id === 7 // Reliable Ordered (+ACK)
+        );
     }
 
     /**
-     * Ordered: 0b01(0b01000000)
-     *
      * @param $flags
      * @return bool
      */
     public static function ordered($flags): bool {
-        return ($flags >> 6) & 0b01 === 1;
+        $id = ($flags & self::FLAGS) >> 5;
+        return (
+            $id === 3    // Reliable Ordered
+            or $id === 7 // Reliable Ordered (+ACK)
+        );
     }
 
     /**
-     * Sequenced: 0b001(0b00100000)
-     *
      * @param $flags
      * @return bool
      */
     public static function sequenced($flags): bool {
-        return ($flags >> 5) & 0b001 === 1;
+        $id = ($flags & self::FLAGS) >> 5;
+        return (
+            $id === 1    // Unreliable Sequenced
+            or $id === 4 // Reliable Sequenced
+        );
     }
 
 }

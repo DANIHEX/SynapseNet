@@ -22,6 +22,10 @@ class Connection {
      */
     public int $guid;
 
+    public array $receiveOrder = [];
+
+    public array $sendOrder = [];
+
     /**
      * @param Address $address
      * @param int $protocol
@@ -87,6 +91,7 @@ class Connection {
      */
     public function handleFrameSet(FrameSetPacket $packet): void {
         CoreServer::getInstance()->getLogger()->info("Frame packet received: " . ord($packet->getBody()[0]));
+
     }
 
     public function disconnect(){
