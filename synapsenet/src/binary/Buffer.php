@@ -28,6 +28,7 @@ class Buffer {
      * @param $len
      *
      * @return string
+     * @throws Exception
      */
     public function get($len): string {
         if($len === 0) {
@@ -58,6 +59,7 @@ class Buffer {
      * @param string $buffer
      *
      * @return Address
+     * @throws Exception
      */
     public function getAddress(string $buffer): Address {
         $buffer = new Buffer($buffer);
@@ -102,4 +104,5 @@ class Buffer {
     public function ended(): bool {
         return $this->offset >= strlen($this->buffer);
     }
+
 }

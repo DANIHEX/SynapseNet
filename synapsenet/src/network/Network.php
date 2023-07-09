@@ -46,6 +46,11 @@ class Network {
     public int $mtuSize;
 
     /**
+     * @var int
+     */
+    public int $fragmentationSize;
+
+    /**
      * @param CoreServer $server
      * @param string $ip
      * @param string $ip6
@@ -141,6 +146,25 @@ class Network {
      */
     public function getMtuSize(): int {
         return $this->mtuSize;
+    }
+
+    /**
+     * @param int $size
+     * @return void
+     * @throws Exception
+     */
+    public function setFragmentationSize(int $size): void {
+        if($size >= $this->getMtuSize()){
+            throw new Exception("Fragmentation size must be less than MTU size. Requested: " . $size . " but MTU: " . $this->getMtuSize());
+        }
+        $this->fragmentationSize = $size;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFragmentationSize(): int {
+        return $this->fragmentationSize;
     }
 
     /**

@@ -17,21 +17,26 @@ class FrameSetPacket extends Packet {
     public int $sequenceNumber;
 
     /**
-     * @var bool
+     * @var int
      */
-    public bool $reliable;
+    public int $flags;
+
     /**
      * @var bool
      */
-    public bool $ordered;
+    public bool $reliable = false;
     /**
      * @var bool
      */
-    public bool $sequenced;
+    public bool $ordered = false;
     /**
      * @var bool
      */
-    public bool $fragmented;
+    public bool $sequenced = false;
+    /**
+     * @var bool
+     */
+    public bool $fragmented = false;
 
     /**
      * @var int
@@ -41,21 +46,31 @@ class FrameSetPacket extends Packet {
     /**
      * @var int
      */
-    public int $reliableFrameIndex;
+    public int $reliableFrameIndex = 0;
     /**
      * @var int
      */
-    public int $sequencedFrameIndex;
-
-
+    public int $sequencedFrameIndex = 0;
     /**
-     * @var array
+     * @var int
      */
-    public array $order = [];
+    public int $orderFrameIndex;
     /**
-     * @var array
+     * @var int
      */
-    public array $fragment = [];
+    public int $orderChannel;
+    /**
+     * @var int
+     */
+    public int $fragmentCompoundSize;
+    /**
+     * @var int
+     */
+    public int $fragmentCompoundId;
+    /**
+     * @var int
+     */
+    public int $fragmentIndex;
 
     /**
      * @var string
@@ -69,8 +84,6 @@ class FrameSetPacket extends Packet {
      */
     public function __construct(int $id, string $buffer) {
         parent::__construct($id, $buffer);
-
-        $this->extract();
     }
 
     /**
@@ -78,6 +91,13 @@ class FrameSetPacket extends Packet {
      */
     public function getSequenceNumber(): int {
         return $this->sequenceNumber;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFlags(): int {
+        return $this->flags;
     }
 
     /**
@@ -90,7 +110,7 @@ class FrameSetPacket extends Packet {
     /**
      * @return bool
      */
-    public function isSOrdered(): bool {
+    public function isOrdered(): bool {
         return $this->ordered;
     }
 
@@ -130,17 +150,38 @@ class FrameSetPacket extends Packet {
     }
 
     /**
-     * @return array
+     * @return int
      */
-    public function getOrder(): array {
-        return $this->order;
+    public function getOrderFrameIndex(): int {
+        return $this->orderFrameIndex;
     }
 
     /**
-     * @return array
+     * @return int
      */
-    public function getFragment(): array {
-        return $this->fragment;
+    public function getOrderChannel(): int {
+        return $this->orderChannel;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFragmentCompoundSize(): int {
+        return $this->fragmentCompoundSize;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFragmentCompoundId(): int {
+        return $this->fragmentCompoundId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFragmentIndex(): int {
+        return $this->fragmentIndex;
     }
 
     /**
@@ -157,22 +198,26 @@ class FrameSetPacket extends Packet {
     public function extract(): FrameSetPacket {
         $this->get(1);
         $this->sequenceNumber = Binary::readLTriad($this->get(3));
-        $flags = $this->get(1);
+        $this->flags = $flags = ord($this->get(1));
         $this->length = Binary::readShort($this->get(2));
         if(ReliabilityType::reliable($flags)){
+            $this->reliable = true;
             $this->reliableFrameIndex = Binary::readLTriad($this->get(3));
         }
-        if(ReliabilityType::ordered($flags)){
+        if(ReliabilityType::sequenced($flags)){
+            $this->sequenced = true;
             $this->sequencedFrameIndex = Binary::readLTriad($this->get(3));
         }
-        if(ReliabilityType::sequenced($flags)){
-            $this->order[0] = Binary::readLTriad($this->get(3));
-            $this->order[1] = $this->get(1);
+        if(ReliabilityType::ordered($flags)){
+            $this->ordered = true;
+            $this->orderFrameIndex = Binary::readLTriad($this->get(3));
+            $this->orderChannel = ord($this->get(1));
         }
         if((($flags >> 4) & 0b0001) === 1){
-            $this->fragment[0] = Binary::readInt($this->get(4));
-            $this->fragment[1] = Binary::readShort($this->get(2));
-            $this->fragment[2] = Binary::readInt($this->get(4));
+            $this->fragmented = true;
+            $this->fragmentCompoundSize = Binary::readInt($this->get(4));
+            $this->fragmentCompoundId = Binary::readShort($this->get(2));
+            $this->fragmentIndex = Binary::readInt($this->get(4));
         }
         $this->body = $this->get(intval(ceil($this->length / 8)));
 
@@ -180,7 +225,28 @@ class FrameSetPacket extends Packet {
     }
 
     public function make(): string {
-        $buffer = "";
+        $buffer = chr($this->getPacketId());
+        $buffer .= Binary::writeLTriad($this->sequenceNumber);
+        $buffer .= chr($this->flags);
+        $buffer .= Binary::writeShort(strlen($this->buffer) << 3);
+        if(ReliabilityType::reliable($this->flags)){
+            $buffer .= Binary::writeLTriad($this->reliableFrameIndex);
+        }
+        if(ReliabilityType::sequenced($this->flags)){
+            $buffer .= Binary::writeLTriad($this->sequencedFrameIndex);
+        }
+        if(ReliabilityType::ordered($this->flags)){
+            $buffer .= Binary::writeLTriad($this->orderFrameIndex);
+            $buffer .= chr($this->orderChannel);
+        }
+        if((($this->flags >> 4) & 0b0001) === 1){
+            $this->fragmented = true;
+            $buffer .= Binary::writeInt($this->fragmentCompoundSize);
+            $buffer .= Binary::writeShort($this->fragmentCompoundId);
+            $buffer .= Binary::writeInt($this->fragmentIndex);
+        }
+        $buffer .= $this->buffer;
+        $this->buffer = $buffer;
         return $buffer;
     }
 

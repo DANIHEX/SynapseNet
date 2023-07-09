@@ -19,11 +19,10 @@ class ConnectionRequestAccepted extends Packet {
 
     /** 
      * According to the wiki 10 same addresses will work fine
-     * NOTE: Addresses must be in a buffer string
      * 
-     * @var string
+     * @var array
      */
-    public string $internalIds;
+    public array $internalIds;
 
     /** @var int */
     public int $requestTime;
@@ -43,9 +42,13 @@ class ConnectionRequestAccepted extends Packet {
      * @return string
      */
     public function make(): string {
+        $ids = "";
+        foreach($this->internalIds as $id){
+            $ids .= $this->getAddressBuffer($id);
+        }
         $this->buffer .= chr($this->getPacketId());
         $this->buffer .= $this->getAddressBuffer($this->clientAddress);
-        $this->buffer .= $this->internalIds;
+        $this->buffer .= $ids;
         $this->buffer .= Binary::writeLong($this->requestTime);
         $this->buffer .= Binary::writeLong($this->time);
 

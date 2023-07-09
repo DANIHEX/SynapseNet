@@ -79,16 +79,19 @@ class ServerSocket {
         }
 
         $send = 8 * 1024 * 1024;
-        $recieve = 8 * 1024 * 1024;
+        $receive = 8 * 1024 * 1024;
         socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, $send);
-        socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, $recieve);
+        socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, $receive);
 
         socket_set_nonblock($this->socket);
 
         self::$instance = $this;
     }
 
-    public static function getInstance(){
+    /**
+     * @return ServerSocket
+     */
+    public static function getInstance(): ServerSocket {
         return self::$instance;
     }
 
@@ -99,7 +102,8 @@ class ServerSocket {
      *
      * @return bool|int
      */
-    public function read(?string &$buffer, ?string &$source, ?int &$port) {
+    public function read(?string &$buffer, ?string &$source, ?int &$port): bool|int {
+        // TODO: Send read data size(in Bytes or KB) to Status thread [Download KB/s]
         return socket_recvfrom($this->socket, $buffer, 65535, 0, $source, $port);
     }
 
@@ -110,7 +114,8 @@ class ServerSocket {
      *
      * @return bool|int
      */
-    public function write(string $buffer, string $dest, int $port) {
+    public function write(string $buffer, string $dest, int $port): bool|int {
+        // TODO: Send wrote data size(in Bytes or KB) to Status thread [Upload KB/s]
         return socket_sendto($this->socket, $buffer, strlen($buffer), 0, $dest, $port);
     }
 }
