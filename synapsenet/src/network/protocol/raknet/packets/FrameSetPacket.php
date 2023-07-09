@@ -227,8 +227,8 @@ class FrameSetPacket extends Packet {
     public function make(): string {
         $buffer = chr($this->getPacketId());
         $buffer .= Binary::writeLTriad($this->sequenceNumber);
-        $buffer .= chr($this->flags);
-        $buffer .= Binary::writeShort(strlen($this->buffer) << 3);
+        $buffer .= Binary::writeByte($this->flags);
+        $buffer .= Binary::writeShort(strlen($buffer) << 3);
         if(ReliabilityType::reliable($this->flags)){
             $buffer .= Binary::writeLTriad($this->reliableFrameIndex);
         }

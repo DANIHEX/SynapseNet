@@ -78,38 +78,101 @@ class Connection {
     }
 
     /**
+     * Add a packet to send queue and make it fragmented if needed
+     *
      * @param Packet $packet
-     * @param int $sequenceNumber
-     * @param int $fragmentsCount
      * @return void
      * @throws Exception
      */
-    public function addToQueue(Packet $packet, int $sequenceNumber = 0, int $fragmentsCount = 0): void {
+    public function addToQueue(Packet $packet): void {
         $buffer = $packet->make();
-        regenerateSN:
-        $sequenceNumber = mt_rand(0, (PHP_INT_MAX - 100000)) + 1;
-        $exists = false;
-        foreach($this->sendQueue as $queue){
-            if($queue["sequenceNumber"] === $sequenceNumber){
-                $exists = true;
-                break;
-            }
-        }
-        if($exists) goto regenerateSN;
-        $time = intval(round(microtime(true), 3) * 1000);
+        $length = strlen($buffer);
 
-        if(strlen($buffer) > Network::getInstance()->getMtuSize()){
+        // Make the packet fragmented
+        if($length > Network::getInstance()->getMtuSize()){
             $fragmentSize = Network::getInstance()->getFragmentationSize();
-            // TODO
+            $count = intval($length / $fragmentSize);
+            $remainder = $length % $fragmentSize;
+
+            // Get a valid sequence of numbers
+            rearrange:
+            $rangeStart = mt_rand(0, (PHP_INT_MAX - 100000));
+            $rangeEnd = $rangeStart + $count + 1;
+            $rangedSequenceNumber = range($rangeStart, $rangeEnd);
+            $rearrange = false;
+            foreach($rangedSequenceNumber as $seqNum){
+                foreach($this->sendQueue as $p){
+                    if($p["sequenceNumber"] === $seqNum){
+                        $rearrange = true;
+                        break;
+                    }
+                }
+            }
+            unset($rangedSequenceNumber[array_key_last($rangedSequenceNumber)]);
+            if($rearrange) goto rearrange;
+
+            // Add fragmented packets to queue
+            $offset = 0;
+            $compoundSize = $remainder > 0 ? $count + 1 : $count;
+            $compoundId = mt_rand(0, 0xfff);
+            $index = 0;
+            foreach($rangedSequenceNumber as $seqNum){
+                $time = intval(round(microtime(true), 8) * 100000000);
+                $pk = new FrameSetPacket(0x80, substr($buffer, $offset, $fragmentSize));
+                $pk->sequenceNumber = $seqNum;
+                $pk->flags = 0b10010000;
+                $pk->length = strlen($buffer) << 3;
+                $pk->reliableFrameIndex = $seqNum;
+                $pk->fragmentCompoundSize = $compoundSize;
+                $pk->fragmentCompoundId = $compoundId;
+                $pk->fragmentIndex = ++$index;
+                $this->sendQueue[$time] = [
+                    "sequenceNumber" => $pk->sequenceNumber,
+                    "packet" => $pk
+                ];
+                $pk->body = $buffer;
+                $offset += $fragmentSize;
+            }
+            if($remainder > 0){
+                $time = intval(round(microtime(true), 8) * 100000000);
+                $pk = new FrameSetPacket(0x80, substr($buffer, $offset, $remainder));
+                $pk->sequenceNumber = $rangeEnd + 1;
+                $pk->flags = 0b11110000;
+                $pk->length = strlen($buffer) << 3;
+                $pk->reliableFrameIndex = $rangeEnd + 1;
+                $pk->fragmentCompoundSize = $compoundSize;
+                $pk->fragmentCompoundId = $compoundId;
+                $pk->fragmentIndex = ++$index;
+                $this->sendQueue[$time] = [
+                    "sequenceNumber" => $pk->sequenceNumber,
+                    "packet" => $pk
+                ];
+                $pk->body = $buffer;
+            }
         } else {
+            // Add the packet to queue
+            regenSeqNum:
+            $regen = false;
+            $seqNum = mt_rand(0, (PHP_INT_MAX - 100000));
+            foreach($this->sendQueue as $p){
+                if($p["sequenceNumber"] === $seqNum){
+                    $regen = true;
+                    break;
+                }
+            }
+            if($regen) goto regenSeqNum;
+
+            $time = intval(round(microtime(true), 8) * 100000000);
             $pk = new FrameSetPacket(0x80, $packet->make());
             $pk->sequenceNumber = 0;
             $pk->flags = 0b10000000;
+            $pk->length = strlen($buffer) << 3;
             $pk->reliableFrameIndex = 0;
             $this->sendQueue[$time] = [
                 "sequenceNumber" => $pk->sequenceNumber,
                 "packet" => $pk
             ];
+            $pk->body = $buffer;
         }
     }
 
@@ -127,23 +190,40 @@ class Connection {
     }
 
     /**
-     * RaknetPacket
-     * Up / Send
-     *
-     * @param Packet $packet
      * @return void
      * @throws Exception
      */
-    public function sendPacket(Packet $packet): void {
-        foreach($this->sendQueue as $sequenceNumber => $pk){
-            CoreServer::getInstance()->getLogger()->info("Packet sent: 0x" . dechex($packet->getPacketId()));
+    public function sendPackets(): void {
+        ksort($this->sendQueue);
+        foreach($this->sendQueue as $pk){
+            $packet = $pk["packet"];
+            $buffer = $packet->make();
+            $data["sequenceNumber"] = $packet->getSequenceNumber();
+            $data["flags"] = (($packet->getFlags() & 0b11110000) >> 4);
+            $data["reliable"] = $packet->isReliable();
+            if($packet->isReliable()) $data["reliableFrameIndex"] = $packet->getReliableFrameIndex();
+            $data["sequenced"] = $packet->isSequenced();
+            if($packet->isSequenced()) $data["sequencedFrameIndex"] = $packet->getSequencedFrameIndex();
+            $data["ordered"] = $packet->isOrdered();
+            if($packet->isOrdered()){
+                $data["orderFrameIndex"] = $packet->getOrderFrameIndex();
+                $data["orderChannel"] = $packet->getOrderChannel();
+            }
+            $data["fragmented"] = $packet->isFragmented();
+            if($packet->isFragmented()){
+                $data["fragmentCompoundSize"] = $packet->getFragmentCompoundSize();
+                $data["fragmentCompoundId"] = $packet->getFragmentCompoundId();
+                $data["fragmentIndex"] = $packet->getFragmentIndex();
+            }
+            $data["length"] = $packet->getLength();
+            $data["body"] = $packet->getBody();
+            var_dump($data);
+            ServerSocket::getInstance()->write($buffer, $this->getAddress()->getIp(), $this->getAddress()->getPort());
+            CoreServer::getInstance()->getLogger()->info("Packet sent: 0x" . dechex(ord($packet->getBody()[0])));
         }
     }
 
     /**
-     * RaknetPacket
-     * Down / Receive
-     *
      * @param string $buffer
      * @return void
      * @throws Exception
@@ -151,16 +231,22 @@ class Connection {
     public function handle(string $buffer): void {
         $pid = ord($buffer[0]);
         CoreServer::getInstance()->getLogger()->info("Connected packet received: 0x" . dechex($pid));
+
+        // Received FrameSetPacket
         if($pid >= 0x80 and $pid <= 0x8d){
             $packet = new FrameSetPacket($pid, $buffer);
             $packet->extract();
             $this->handleFrameSet($packet);
         }
+
+        // Received reliability packet
         if($pid === 0xc0 or $pid === 0xa0){
             $packet = new ACK($pid, $buffer);
             $packet->extract();
             $this->receiveReliability($packet);
         }
+
+        // Send queued packets
         $this->sendPackets();
     }
 
@@ -204,19 +290,26 @@ class Connection {
      */
     public function handleFrameSet(FrameSetPacket $packet): void {
         CoreServer::getInstance()->getLogger()->info("Frame packet received: " . dechex(ord($packet->getBody()[0])));
-//        $data = [
-//            "sequenceNumber" => $packet->getSequenceNumber(),
-//            "flags" => decbin(($packet->getFlags() | 0b00000000) >> 3),
-//            "reliable" => $packet->isReliable(),
-//            "ordered" => $packet->isOrdered(),
-//            "sequenced" => $packet->isSequenced(),
-//            "fragmented" => $packet->isFragmented(),
-//            "length" => $packet->getLength(),
-//            "body" => $packet->getBody()
-//        ];
-//        var_dump($data);
-
-        $this->sequences[$packet->getSequenceNumber()] = $packet;
+        $data["sequenceNumber"] = $packet->getSequenceNumber();
+        $data["flags"] = decbin(($packet->getFlags() | 0b00000000) >> 3);
+        $data["reliable"] = $packet->isReliable();
+        if($packet->isReliable()) $data["reliableFrameIndex"] = $packet->getReliableFrameIndex();
+        $data["sequenced"] = $packet->isSequenced();
+        if($packet->isSequenced()) $data["sequencedFrameIndex"] = $packet->getSequencedFrameIndex();
+        $data["ordered"] = $packet->isOrdered();
+        if($packet->isOrdered()){
+            $data["orderFrameIndex"] = $packet->getOrderFrameIndex();
+            $data["orderChannel"] = $packet->getOrderChannel();
+        }
+        $data["fragmented"] = $packet->isFragmented();
+        if($packet->isFragmented()){
+            $data["fragmentCompoundSize"] = $packet->getFragmentCompoundSize();
+            $data["fragmentCompoundId"] = $packet->getFragmentCompoundId();
+            $data["fragmentIndex"] = $packet->getFragmentIndex();
+        }
+        $data["length"] = $packet->getLength();
+        $data["body"] = $packet->getBody();
+        var_dump($data);
 
         if($packet->isFragmented()){
              $this->handleFragmented($packet);
@@ -254,7 +347,6 @@ class Connection {
         $pk->addRecord($record);
         $buffer = $pk->make();
         ServerSocket::getInstance()->write($buffer, $this->getAddress()->getIp(), $this->getAddress()->getPort());
-        $this->sendPacket($pk);
         return $reliable;
     }
 
