@@ -1,47 +1,57 @@
 <?php
 
+// This is based on https://github.com/OculusVR/RakNet/blob/master/Source/PacketPriority.h
+
 namespace synapsenet\network\protocol\raknet;
 
 class ReliabilityType {
 
-    public const FLAGS = 0b11100000;
+    public const MAP = [
+
+    ];
+
+    public const UNRELIABLE = 0;
+    public const UNRELIABLE_SEQUENCED = 1;
+    public const RELIABLE = 2;
+    public const RELIABLE_ORDERED = 3;
+    public const RELIABLE_SEQUENCED = 4;
+    public const UNRELIABLE_ACK = 5;
+    public const RELIABLE_ACK = 6;
+    public const RELIABLE_ORDERED_ACK = 7;
 
     /**
-     * @param $flags
+     * @param int $id
      * @return bool
      */
-    public static function reliable($flags): bool {
-        $id = ($flags & self::FLAGS) >> 5;
+    public static function reliable(int $id): bool {
         return (
-            $id === 2    // Reliable
-            or $id === 3 // Reliable Ordered
-            or $id === 4 // Reliable Sequenced
-            or $id === 6 // Reliable (+ACK)
-            or $id === 7 // Reliable Ordered (+ACK)
+            $id === self::RELIABLE
+            or $id === self::RELIABLE_ORDERED
+            or $id === self::RELIABLE_SEQUENCED
+            or $id === self::RELIABLE_ACK
+            or $id === self::RELIABLE_ORDERED_ACK
         );
     }
 
     /**
-     * @param $flags
+     * @param int $id
      * @return bool
      */
-    public static function ordered($flags): bool {
-        $id = ($flags & self::FLAGS) >> 5;
+    public static function ordered(int $id): bool {
         return (
-            $id === 3    // Reliable Ordered
-            or $id === 7 // Reliable Ordered (+ACK)
+            $id === self::RELIABLE_ORDERED    // Reliable Ordered
+            or $id === self::RELIABLE_ORDERED_ACK // Reliable Ordered (+ACK)
         );
     }
 
     /**
-     * @param $flags
+     * @param int $id
      * @return bool
      */
-    public static function sequenced($flags): bool {
-        $id = ($flags & self::FLAGS) >> 5;
+    public static function sequenced(int $id): bool {
         return (
-            $id === 1    // Unreliable Sequenced
-            or $id === 4 // Reliable Sequenced
+            $id === self::UNRELIABLE_SEQUENCED    // Unreliable Sequenced
+            or $id === self::RELIABLE_SEQUENCED // Reliable Sequenced
         );
     }
 

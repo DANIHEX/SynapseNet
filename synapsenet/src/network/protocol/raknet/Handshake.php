@@ -65,7 +65,7 @@ class Handshake {
             return;
         }
 
-        CoreServer::getInstance()->getLogger()->info("Unconnected packet received: " . $packet->getPacketId());
+//        CoreServer::getInstance()->getLogger()->info("Unconnected packet received: " . $packet->getPacketId());
 
         switch($packet->getPacketId()){
             case RaknetPacketIds::UNCONNECTED_PING:
@@ -81,7 +81,7 @@ class Handshake {
                 /** @var OpenConnectionRequest2 $packet */
                 $this->handleOpenConnectionRequest2($address, $packet);
                 $this->openConnection($address);
-                CoreServer::getInstance()->getLogger()->info("Connection opened for " . $address->string());
+                CoreServer::getInstance()->getLogger()->info(PHP_EOL . PHP_EOL . "Connection opened for " . $address->string() . PHP_EOL . PHP_EOL);
                 break;
         }
     }

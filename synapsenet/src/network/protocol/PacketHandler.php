@@ -10,7 +10,6 @@ use synapsenet\network\Address;
 use synapsenet\network\ConnectionManager;
 use synapsenet\network\Network;
 use synapsenet\network\protocol\raknet\Handshake;
-use synapsenet\network\protocol\raknet\RaknetPacketHandler;
 
 class PacketHandler {
 
@@ -23,11 +22,6 @@ class PacketHandler {
      * @var ServerSocket
      */
     public ServerSocket $socket;
-
-    /**
-     * @var RaknetPacketHandler
-     */
-    public RaknetPacketHandler $raknet;
 
     /**
      * @var Handshake
@@ -79,7 +73,7 @@ class PacketHandler {
      */
     public function send(Address $address, Packet $packet): void {
         $this->getSocket()->write($packet->make(), $address->getIp(), $address->getPort());
-        CoreServer::getInstance()->getLogger()->info("Packet sent: " . $packet->getPacketId());
+//        CoreServer::getInstance()->getLogger()->info("Packet sent: " . $packet->getPacketId());
     }
 
     /**

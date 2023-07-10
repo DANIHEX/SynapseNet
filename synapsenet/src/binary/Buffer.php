@@ -13,7 +13,7 @@ class Buffer {
     public int $offset;
 
     /** @var string */
-    protected string $buffer;
+    public string $buffer;
 
     /**
      * @param string $buffer

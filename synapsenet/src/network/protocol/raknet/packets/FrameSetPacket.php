@@ -14,12 +14,12 @@ class FrameSetPacket extends Packet {
     /**
      * @var int
      */
-    public int $sequenceNumber;
+    public int $sequenceNumber = 0;
 
     /**
      * @var int
      */
-    public int $flags;
+    public int $reliabilityId;
 
     /**
      * @var bool
@@ -50,7 +50,7 @@ class FrameSetPacket extends Packet {
     /**
      * @var int
      */
-    public int $sequencedFrameIndex = 0;
+    public int $sequencedFrameIndex;
     /**
      * @var int
      */
@@ -82,7 +82,7 @@ class FrameSetPacket extends Packet {
      * @param string $buffer
      * @throws Exception
      */
-    public function __construct(int $id, string $buffer) {
+    public function __construct(int $id = 0x80, string $buffer = "") {
         parent::__construct($id, $buffer);
     }
 
@@ -96,8 +96,8 @@ class FrameSetPacket extends Packet {
     /**
      * @return int
      */
-    public function getFlags(): int {
-        return $this->flags;
+    public function getReliability(): int {
+        return $this->reliabilityId;
     }
 
     /**
@@ -198,22 +198,23 @@ class FrameSetPacket extends Packet {
     public function extract(): FrameSetPacket {
         $this->get(1);
         $this->sequenceNumber = Binary::readLTriad($this->get(3));
-        $this->flags = $flags = ord($this->get(1));
+        $flags = Binary::readByte($this->get(1));
+        $this->reliabilityId = (($flags >> 5) & 0b111);
         $this->length = Binary::readShort($this->get(2));
-        if(ReliabilityType::reliable($flags)){
+        if(ReliabilityType::reliable($this->reliabilityId)){
             $this->reliable = true;
             $this->reliableFrameIndex = Binary::readLTriad($this->get(3));
         }
-        if(ReliabilityType::sequenced($flags)){
+        if(ReliabilityType::sequenced($this->reliabilityId)){
             $this->sequenced = true;
             $this->sequencedFrameIndex = Binary::readLTriad($this->get(3));
         }
-        if(ReliabilityType::ordered($flags)){
+        if(ReliabilityType::ordered($this->reliabilityId)){
             $this->ordered = true;
             $this->orderFrameIndex = Binary::readLTriad($this->get(3));
             $this->orderChannel = ord($this->get(1));
         }
-        if((($flags >> 4) & 0b0001) === 1){
+        if(($flags & 0b00010000) > 0){
             $this->fragmented = true;
             $this->fragmentCompoundSize = Binary::readInt($this->get(4));
             $this->fragmentCompoundId = Binary::readShort($this->get(2));
@@ -227,27 +228,34 @@ class FrameSetPacket extends Packet {
     public function make(): string {
         $buffer = chr($this->getPacketId());
         $buffer .= Binary::writeLTriad($this->sequenceNumber);
-        $buffer .= Binary::writeByte($this->flags);
+        $buffer .= chr($this->reliabilityId << 5 | $this->fragmented ? 0b0001000 : 0);
         $buffer .= Binary::writeShort(strlen($buffer) << 3);
-        if(ReliabilityType::reliable($this->flags)){
+        if(ReliabilityType::reliable($this->reliabilityId)){
             $buffer .= Binary::writeLTriad($this->reliableFrameIndex);
         }
-        if(ReliabilityType::sequenced($this->flags)){
+        if(ReliabilityType::sequenced($this->reliabilityId)){
             $buffer .= Binary::writeLTriad($this->sequencedFrameIndex);
         }
-        if(ReliabilityType::ordered($this->flags)){
+        if(ReliabilityType::ordered($this->reliabilityId)){
             $buffer .= Binary::writeLTriad($this->orderFrameIndex);
             $buffer .= chr($this->orderChannel);
         }
-        if((($this->flags >> 4) & 0b0001) === 1){
+        if($this->fragmented){
             $this->fragmented = true;
             $buffer .= Binary::writeInt($this->fragmentCompoundSize);
             $buffer .= Binary::writeShort($this->fragmentCompoundId);
             $buffer .= Binary::writeInt($this->fragmentIndex);
         }
-        $buffer .= $this->buffer;
+        $buffer .= $this->body;
         $this->buffer = $buffer;
         return $buffer;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData(): array {
+        return get_object_vars($this);
     }
 
 }
