@@ -1,7 +1,7 @@
 <h1 align="center">SynapseNet</h1>
 <p>SynapseNet is a highl quality MCBE server software, written in PHP</p>
 <p>SynapseNet has a seperate api from pocketmine, so pocketmine plugins may not work, however after plugins are supported, there will be a plugin to convert small pocketmine plugins and mabye some big plugins.</p> 
-
+<h2>WE ARE LOOKING FOR MORE DEVS IF U WANNA JOIN OUR TEAM DM ME : @VEZAWX IN DISCORD/TELEGRAM </h2>
 <hr>
 <h5>Start Your Setup</h5>
 <ol>
