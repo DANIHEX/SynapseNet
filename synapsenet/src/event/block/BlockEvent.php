@@ -1,3 +1,4 @@
+
 <?php
 
 namespace synapsenet\event\block;

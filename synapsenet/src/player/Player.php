@@ -2,7 +2,9 @@
 
 namespace synapsenet\player;
 
-class Player {
+use synapsenet\entity\Human;
+
+class Player extends Human {
 
     /** @var string */
     protected string $name;
